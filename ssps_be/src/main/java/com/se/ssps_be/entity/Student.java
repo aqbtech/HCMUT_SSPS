@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name = "student")
 public class Student {
 	// it is mssv and have 7 digits
 	@Id
@@ -18,4 +19,6 @@ public class Student {
 	private List<LogInfo> logInfo;
 	@OneToMany(mappedBy = "student")
 	private List<PrintJob> printJob;
+	@OneToMany
+	private List<Document> document;
 }

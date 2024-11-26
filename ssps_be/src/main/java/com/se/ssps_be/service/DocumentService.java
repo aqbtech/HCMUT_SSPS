@@ -1,8 +1,10 @@
 package com.se.ssps_be.service;
 
-import com.se.ssps_be.entity.DocsType;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 public interface DocumentService {
-	void saveDocument(String fileName, DocsType docsType, MultipartFile file);
+	void saveDocument(String username, MultipartFile file) throws IOException;
+	void renameDocument(String id, String name);
 }
