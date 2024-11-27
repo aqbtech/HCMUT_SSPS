@@ -9,12 +9,10 @@ import java.util.Date;
 @Data
 public class LogInfo {
 	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	private Date date;
 
-	@ManyToOne
-	@JoinColumn(name = "student_id", referencedColumnName = "id")
-	private Student student;
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	private PrintJob printJob;
 }

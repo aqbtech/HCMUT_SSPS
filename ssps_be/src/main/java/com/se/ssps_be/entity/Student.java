@@ -11,14 +11,13 @@ import java.util.List;
 public class Student {
 	// it is mssv and have 7 digits
 	@Id
+	@Column(name = "id")
 	private Long id;
 	private String username;
 	private Long remainingBalance;
 
-	@OneToMany(mappedBy = "student")
-	private List<LogInfo> logInfo;
-	@OneToMany(mappedBy = "student")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "student")
 	private List<PrintJob> printJob;
-	@OneToMany
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "student")
 	private List<Document> document;
 }

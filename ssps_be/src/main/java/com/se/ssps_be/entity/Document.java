@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
@@ -20,14 +22,16 @@ public abstract class Document {
 	private String name;
 	@Column(nullable = false)
 	private DocsType type;
+	@Column(nullable = false)
+	private Integer totalPages;
 	@Lob
 	@Column(name = "data", nullable = false, columnDefinition = "MEDIUMBLOB")
+	@Basic(fetch = FetchType.LAZY)
 	private byte[] content;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id", referencedColumnName = "id")
 	private Student student;
-	@ManyToOne
-	@JoinColumn(name = "print_job_id", referencedColumnName = "id")
-	private PrintJob printJob;
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<PrintJob> printJob;
 }

@@ -3,25 +3,33 @@ package com.se.ssps_be.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @Entity
+@NamedEntityGraph(name = "PrintJob.detail",
+	attributeNodes = {
+		@NamedAttributeNode("student"),
+		@NamedAttributeNode("printDevice"),
+		@NamedAttributeNode("document")
+	}
+)
 public class PrintJob {
 	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private PageSize paperSize;
 	private int numberOfCopies;
 	private boolean landscape;
-	private PageSize pageSize;
+	private PrintState state;
+	private int balanceConsumed;
 
-	@OneToMany
-	@JoinColumn(name = "document_id", referencedColumnName = "id")
-	private List<Document> document;
-	@ManyToOne
+	@Enumerated(EnumType.STRING)
+	private PaperSize paperSize;
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id", referencedColumnName = "id")
 	private Student student;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "print_device_id", referencedColumnName = "id")
 	private PrintDevice printDevice;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "docs_id", referencedColumnName = "id")
+	private Document document;
 }
