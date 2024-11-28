@@ -11,7 +11,7 @@ export default function StudentHeader(props) {
 
     const items = [
         { text: "Trang chủ", link: "/student"}, 
-        { text: "In tài liệu", link: "/student/print"},
+        { text: "In tài liệu", link: "/student/upload"},
         { text: "Mua trang in", link: "/student/buy"},
         { text: "Lịch sử in", link: "/student/log"},
         { text:  "Tài liệu của bạn ", link: "/student/print"},

@@ -1,6 +1,18 @@
 .print-request-sent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 3rem;
+    text-align: center;
+    padding: 20px;
+}
+
+.upload-box {
+    margin-top: 20px;
+}
+
+.upload-box input[type="file"] {
+    display: block;
+    margin: 0 auto 10px;
+}
+
+.upload-box button {
+    display: block;
+    margin: 0 auto;
 }

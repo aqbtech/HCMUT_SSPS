@@ -25,7 +25,7 @@ export default function AdminHeader() {
                 <FontAwesomeIcon icon={faMessage} />
                 <FontAwesomeIcon icon={faBell} /> 
                 <FontAwesomeIcon icon={faUser} />
-                <p>{getUser().firstName}</p>
+                <p>{getUser().fullName}</p>
                 <a href="#" onClick={handleLogout}><FontAwesomeIcon icon={faRightFromBracket} color="#0D99FF"/></a>
             </div>   
         </header>

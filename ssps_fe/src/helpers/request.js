@@ -1,46 +1,59 @@
-export async function sendGetRequest(path, errorMessage) {
-    try {
-        const host = 'http://localhost:8080';
-        const response = await fetch(host + path, {
-            method: 'GET',
-            headers: {  
-            }
-        });
 
+import axios from "axios";
+import Cookies from 'js-cookie'
+
+export const axiosClient = axios.create({
+    baseURL: `http://localhost:8080`,
+    timeout: 10000,
+    headers : {
+        'Content-Type' : 'application/json'
+    }
+});
+export const axiosClient1 = axios.create({
+    baseURL: `http://localhost:8081`,
+    timeout: 10000,
+    headers : {
+        'Content-Type' : 'application/json'
+    }
+});
+
+axiosClient.interceptors.request.use(
+    async (config) => {
+        const token = Cookies.get('TOKEN');
+
+        if(token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config
+    }, (err) =>  {
+        return Promise.reject(err)
+})
+
+export async function sendGetRequest(path, body) {
+    try {
+        const response = await axiosClient.get(`${path}`, body);
         // return response;
-        if (response.ok) {
-            const json = await response.json();
-            return json;
-        } 
-        
-        window.alert('GET Request failed: ' + errorMessage);
-        return undefined;
+        return response.data;
     } catch (error) {
-        console.error('Cannot send GET request:' + error);
+        console.error("GET Request failed:", error);
+        window.alert(`GET Request failed: ${error.message}`);
+        return undefined;
     }
 }
 
-export default async function sendRequest(method, path, data, errorMessage) {
+export default async function sendRequest(method, path, data) {
     try {
-        const host = 'http://localhost:8080';
-
-        const response = await fetch (host + path, {
+        const response = await axiosClient.request({
             method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+            url: path,
+            data: data, 
         });
 
         // return response;
-        if (response.ok) {
-            const json = await response.json();
-            return json;
-        } 
-        
-        window.alert( method + ' request failed: ' + errorMessage);
-        return undefined;
+        return response.data;
     } catch(error) {
-        console.error('Cannot send request: ' + error);
+        console.error(`${method} Request failed:`, error);
+        window.alert(`${method} Request failed: ${error.message}`);
+        return undefined;
     }
 }
