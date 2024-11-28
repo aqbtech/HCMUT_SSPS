@@ -1,26 +1,34 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import StudentHeader from "../../components/StudentHeader";
 import Button from "../../components/Button";
+import { sendGetRequest} from "../../helpers/request";
+import  sendRequest from "../../helpers/request";
 import { useNavigate } from "react-router-dom";
 import LoginFooter from "../../components/LoginFooter";
 import "./../../styles/docs.css";
 
 export default function UploadedDocs() {
-    const [docs, setDocs] = useState([
-        { id: 1, name: "Hướng dẫn sử dụng SAP", url: "/docs/sap-guide.pdf" },
-        { id: 2, name: "Luật Giáo dục 2019", url: "/docs/education-law.pdf" },
-        { id: 3, name: "Báo cáo tài chính Q1", url: "/docs/financial-report-q1.pdf" },
-    ]);
+    const [docs, setDocs] = useState([]);
     const navigate = useNavigate(); // Dùng để điều hướng
 
-    const handleDownload = (url) => {
-        // Simulate download
-        alert(`Đang tải xuống tài liệu từ ${url}`);
-    };
+     useEffect(() => {
+        const fetchDocs = async () => {
+            const result = await sendGetRequest('/api/v1/document/all-documents', { page: 0, size: 10 });
+            if (result) {
+                setDocs(result);
+            } else {
+                setDocs([]); // Ensure docs is always an array
+            }
+        };
 
-    const handleDelete = (docId) => {
-        // Xóa tài liệu khỏi danh sách
-        setDocs(docs.filter(doc => doc.id !== docId));
+        fetchDocs();
+    }, []);
+
+    const handleDelete = async (docId) => {
+        const result = await sendRequest('DELETE', `/api/v1/document/delete?id=${docId}`, null);
+        if (result) {
+            setDocs(docs.filter(doc => doc.id !== docId));
+        }
     };
 
     return (
@@ -37,7 +45,6 @@ export default function UploadedDocs() {
                                         <strong>{doc.name}</strong>
                                     </div>
                                     <div className="doc-actions">
-                                        <Button action={() => handleDownload(doc.url)}>Tải xuống</Button>
                                         <Button action={() => handleDelete(doc.id)}>Xóa</Button>
                                     </div>
                                 </li>

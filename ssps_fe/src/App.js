@@ -33,6 +33,7 @@ import Test from './pages/Test';
 import PaymentRequestSent from './pages/student/PaymentRequestSent';
 import LogRoute from './pages/admin/LogRoute';
 import RegisterPrinter from './pages/student/RegisterPrinter';
+import Upload from './pages/student/Upload';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
     <Route path='/student' element={<StudentRoute />} />
     <Route path='/student/home' element={<StudentHome />} />
     <Route path='/student/print' element={<PrintDoc />} />
+     <Route path='/student/upload' element={<Upload />} />
     <Route path='/student/print/success' element={<PrintRequestSent />} />
     <Route path='/student/buy' element={<BuyPage />} />
     <Route path='/student/buy/success' element={<PaymentRequestSent />} />

@@ -1,7 +1,6 @@
 import Button from "./Button";
 
 import LogoHCMUT from "./LogoHCMUT";
-import LogoSSPS from "./LogoSSPS";
 import "../styles/header.css";
 import NavBar from "./Navbar";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +19,10 @@ export default function Header() {
         navigate('/');
     }
 
+    function handleLoginClick() {
+        window.location.href = "http://localhost:8081/sso/login";
+    }
+    
     return (
         <header className="header">
             <div className="logo" onClick={handleLogoClick}>
@@ -30,7 +33,7 @@ export default function Header() {
                 items={items}
                 static={true}
             >
-                <Button link="/Login">
+                <Button onClick={handleLoginClick}>
                     Đăng nhập
                 </Button>
                 <Button link="/Login">

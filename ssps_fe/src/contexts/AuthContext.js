@@ -8,9 +8,10 @@ export function useAuth() {
 
 export function AuthProvider( { children } ) {
     const [auth, setAuth] = useState({}); // NOTE: deprecated -> use SessionStorage
+    const [userDetails, setUserDetails] = useState({});
 
     function getUser() {
-        return JSON.parse(sessionStorage.getItem('user'));
+        return JSON.parse(userDetails);
     }
 
     function login(userData) {
@@ -24,7 +25,7 @@ export function AuthProvider( { children } ) {
     }
 
     return (
-        <AuthContext.Provider value={{ auth, setAuth, login, logout, getUser }}>
+        <AuthContext.Provider value={{ auth, setAuth, login, logout, getUser, userDetails, setUserDetails}}>
             {children}
         </AuthContext.Provider>
     )
