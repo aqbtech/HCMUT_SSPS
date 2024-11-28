@@ -168,7 +168,7 @@ public class SPSOServiceImpl implements SPSOService {
     private PrintJobResponse mapToPrintJobResponse(PrintJob printJob){
         PrintJobResponse response;
         StudentResponse studentResponse = this.mapToStudentResponse(printJob.getStudent());
-        PrinterResponse printerResponse = this.mapToPrinterResponse(printJob.getPrinter());
+        PrinterResponse printerResponse = this.mapToPrinterResponse(printJob.getPrintDevice());
         response = PrintJobResponse.builder()
                 .studentResponse(studentResponse)
                 .totalPages(printJob.getTotalPages())

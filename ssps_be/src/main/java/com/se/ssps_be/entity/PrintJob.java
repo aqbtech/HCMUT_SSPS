@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "printjob", attributeNodes = {
                 @NamedAttributeNode("student"),
-                @NamedAttributeNode("printer")}
+                @NamedAttributeNode("printDevice")}
         )
 })
 @Entity
@@ -34,7 +34,7 @@ public class PrintJob {
 	private int balanceConsumed;
 
     @Enumerated(EnumType.STRING)
-    private PageSize paperSize;
+    private PaperSize paperSize;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
