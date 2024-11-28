@@ -1,0 +1,57 @@
+/* Header container */
+.header {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between; /* Căn đều logo và navbar */
+    background-color:#0000FF ; /* Màu nền xanh nước biển */
+    width: 100%;
+    height: 5rem;
+    padding: 0 2rem; /* Thêm padding cho phần lề */
+}
+
+/* Logo section */
+.header .logo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Căn logo về bên trái */
+}
+
+/* Logo item (tùy chỉnh kích thước logo) */
+.header .logo svg {
+    height: 40px; /* Điều chỉnh kích thước logo */
+    margin-right: 10px;
+}
+
+/* Navbar menu section */
+.header .navbar {
+    display: flex;
+    justify-content: flex-end; /* Căn phải các mục menu */
+    flex: 1;
+}
+
+/* Navbar items */
+.header .navbar-nav .nav-link {
+    color: white; /* Màu chữ trắng cho các mục menu */
+    margin-right: 15px; /* Khoảng cách giữa các mục menu */
+    font-size: 1rem; /* Đặt kích thước chữ */
+    transition: color 0.3s ease; /* Thêm hiệu ứng chuyển màu */
+}
+
+/* Thay đổi màu khi hover vào các mục menu */
+.header .navbar-nav .nav-link:hover {
+    color: #fff; /* Đảm bảo chữ sáng lên khi hover */
+}
+
+/* Định dạng cho button đăng nhập */
+.header .btn-outline-light {
+    margin-left: 20px; /* Tạo khoảng cách cho button */
+    color: white; /* Màu chữ trắng cho nút */
+    border-color: white; /* Màu viền trắng */
+}
+
+/* Hiệu ứng khi hover vào nút đăng nhập */
+.header .btn-outline-light:hover {
+    background-color: white; /* Màu nền trắng khi hover */
+    color: #17a2b8; /* Màu chữ xanh nước biển khi hover */
+}
