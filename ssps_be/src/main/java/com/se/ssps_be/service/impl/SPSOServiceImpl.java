@@ -1,4 +1,4 @@
-package com.se.ssps_be.service;
+package com.se.ssps_be.service.impl;
 
 import com.se.ssps_be.dto.request.AddPrinterRequest;
 import com.se.ssps_be.dto.request.NewSystemConfigRequest;
@@ -6,7 +6,10 @@ import com.se.ssps_be.dto.response.*;
 import com.se.ssps_be.entity.*;
 import com.se.ssps_be.exception.ErrorCode;
 import com.se.ssps_be.exception.WebServerException;
+import com.se.ssps_be.repo.PrintDeviceRepo;
+import com.se.ssps_be.repo.PrintJobRepo;
 import com.se.ssps_be.repository.*;
+import com.se.ssps_be.service.SPSOService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,23 +28,23 @@ public class SPSOServiceImpl implements SPSOService {
     @Autowired
     private final SPSORepository spsoRepository;
     @Autowired
-    private final PrinterRepository printerRepository;
+    private final PrintDeviceRepo printerRepository;
     @Autowired
     private final SystemConfigRepository systemConfigRepository;
     @Autowired
     private final StudentRepository studentRepository;
     @Autowired
-    private final PrintJobRepository printJobRepository;
+    private final PrintJobRepo printJobRepository;
     @Autowired
     private final PrintJobReportRepository printJobReportRepository;
 
     @Override
-    public String updatePrinterStatus(String printerId, boolean status) {// Cập nhật trạng thái máy in (bật/tắt)
+    public String updatePrinterStatus(Long printerId, boolean status) {// Cập nhật trạng thái máy in (bật/tắt)
         try {
-            Optional<Printer> printerOpt = printerRepository.findById(printerId);
+            Optional<PrintDevice> printerOpt = printerRepository.findById(printerId);
             if (printerOpt.isPresent()) {
-                Printer printer = printerOpt.get();
-                printer.setDescription(status ? "enabled" : "disabled");
+                PrintDevice printer = printerOpt.get();
+                printer.setStatus(status ? "enabled" : "disabled");
                 printerRepository.save(printer);
                 return status ?  "Máy in đã khả dụng" : "Xóa máy in thành công";
             } else {
@@ -61,13 +64,17 @@ public class SPSOServiceImpl implements SPSOService {
                     .building(request.getBuilding())
                     .room(request.getRoom())
                     .build();
-            Printer printer = Printer.builder()
+            PrintDevice printDevice = PrintDevice.builder()
                     .brand(request.getBrand())
-                    .description("enabled")
-                    .model(request.getModel())
+                    .name(request.getName())
+                    .status("enabled")
+                    .pageCapacity(request.getPageCapacity())
+                    .remainingPage(request.getRemainingPage())
+                    .remainingBlackInk(request.isRemainingBlackInk())
+                    .supportedPaperSize(request.getSupportedPaperSize())
                     .location(location)
                     .build();
-            printerRepository.save(printer);
+            printerRepository.save(printDevice);
 
             return "Thêm máy in thành công";
         }
@@ -78,9 +85,9 @@ public class SPSOServiceImpl implements SPSOService {
 
     @Override
     public List<PrinterResponse> getAllPrinter(){
-        List<Printer> printers = printerRepository.findAll();
+        List<PrintDevice> printers = printerRepository.findAll();
         List<PrinterResponse> responses = new ArrayList<>();
-        for (Printer printer: printers){
+        for (PrintDevice printer: printers){
             responses.add(this.mapToPrinterResponse(printer));
         }
         return responses;
@@ -88,9 +95,9 @@ public class SPSOServiceImpl implements SPSOService {
 
     @Override
     public List<PrinterResponse> getEnablePrinter(){
-        List<Printer> printers = printerRepository.findByDescription("enabled");
+        List<PrintDevice> printers = printerRepository.findByStatus("enabled");
         List<PrinterResponse> responses = new ArrayList<>();
-        for (Printer printer: printers){
+        for (PrintDevice printer: printers){
             responses.add(this.mapToPrinterResponse(printer));
         }
         return responses;
@@ -98,9 +105,9 @@ public class SPSOServiceImpl implements SPSOService {
 
     @Override
     public List<PrinterResponse> getDisablePrinter(){
-        List<Printer> printers = printerRepository.findByDescription("disabled");
+        List<PrintDevice> printers = printerRepository.findByStatus("disabled");
         List<PrinterResponse> responses = new ArrayList<>();
-        for (Printer printer: printers){
+        for (PrintDevice printer: printers){
             responses.add(this.mapToPrinterResponse(printer));
         }
         return responses;
@@ -144,16 +151,20 @@ public class SPSOServiceImpl implements SPSOService {
                 .build();
     }
 
-    private PrinterResponse mapToPrinterResponse(Printer printer) {
+    private PrinterResponse mapToPrinterResponse(PrintDevice printer) {
         String building = printer.getLocation().getBuilding();
         String room = printer.getLocation().getRoom();
         String campus = printer.getLocation().getCampus();
         String location = String.join(",",building,room,campus);
         return PrinterResponse.builder()
-                .printerId(printer.getPrinterId())
+                .printerId(printer.getId())
                 .brand(printer.getBrand())
-                .model(printer.getModel())
-                .description(printer.getDescription())
+                .model(printer.getName())
+                .description(printer.getStatus())
+                .pageCapacity(printer.getPageCapacity())
+                .supportedPaperSize(printer.getSupportedPaperSize())
+                .remainingPage(printer.getRemainingPage())
+                .remainingBlackInk(printer.isRemainingBlackInk())
                 .location(location) // Tùy chỉnh hàm toString() trong `Location`
                 .build();
     }
@@ -173,7 +184,7 @@ public class SPSOServiceImpl implements SPSOService {
                 .studentResponse(studentResponse)
                 .totalPages(printJob.getTotalPages())
                 .endTime(printJob.getEndTime())
-                .fileName(printJob.getFileName())
+                .fileName(printJob.getDocument().getName())
                 .paperSize(String.valueOf(printJob.getPaperSize()))
                 .printerResponse(printerResponse)
                 .startTime(printJob.getStartTime())
@@ -221,10 +232,10 @@ public class SPSOServiceImpl implements SPSOService {
     }
 
     @Override
-    public List<PrintJobResponse> getPrintJobsByPrinter(String printerId) {
-        Printer printer = printerRepository.findById(printerId)
+    public List<PrintJobResponse> getPrintJobsByPrinter(Long printerId) {
+        PrintDevice printer = printerRepository.findById(printerId)
                 .orElseThrow(()->new WebServerException(ErrorCode.PRINT_NOT_FOUND));
-        List<PrintJob> printJobs = printJobRepository.findByPrinter(printer);
+        List<PrintJob> printJobs = printJobRepository.findByPrintDevice(printer);
         List<PrintJobResponse> responses = new ArrayList<>();
         for(PrintJob printJob : printJobs){
             responses.add(this.mapToPrintJobResponse(printJob));
@@ -252,8 +263,8 @@ public class SPSOServiceImpl implements SPSOService {
         return report;
     }
     @Override
-    @Scheduled(cron = "0 0 0 1 * *") // Chạy vào 0h00 ngày đầu tiên mỗi tháng
-//    @Scheduled(fixedRate = 60000)
+//    @Scheduled(cron = "0 0 0 1 * *") // Chạy vào 0h00 ngày đầu tiên mỗi tháng
+    @Scheduled(fixedRate = 60000)
     public void generateMonthlyReportAutomatically() {
         // Xác định tháng cần báo cáo (tháng trước)
         LocalDate now = LocalDate.now();

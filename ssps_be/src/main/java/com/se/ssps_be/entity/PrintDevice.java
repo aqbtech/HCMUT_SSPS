@@ -1,22 +1,27 @@
 package com.se.ssps_be.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class PrintDevice {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	private String name;
-	private String location;
+	@Embedded
+	private Location location;
 	private String status;
 	private Long pageCapacity;
 	private Long remainingPage;
 	private boolean remainingBlackInk;
+	private String brand;
 
 	@OneToMany(mappedBy = "printDevice", fetch = FetchType.LAZY)
 	private List<PrintJob> printJob;

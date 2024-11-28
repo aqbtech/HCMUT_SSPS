@@ -14,6 +14,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@NamedEntityGraph(name = "config",
+        attributeNodes = {
+                @NamedAttributeNode("allowedFileTypes"),
+        }
+)
 public class SystemConfig {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
