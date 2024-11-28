@@ -2,10 +2,10 @@ package com.se.ssps_be.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,28 +16,35 @@ import java.time.LocalDateTime;
                 @NamedAttributeNode("printer")}
         )
 })
+@Entity
+@NamedEntityGraph(name = "PrintJob.detail",
+	attributeNodes = {
+		@NamedAttributeNode("student"),
+		@NamedAttributeNode("printDevice"),
+		@NamedAttributeNode("document")
+	}
+)
 public class PrintJob {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private Student student; // Sinh viên thực hiện in
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "printer_id")
-    private Printer printer; // Máy in thực hiện in
-
-    private String fileName;
-    private Integer totalPages;
+	private int numberOfCopies;
+	private boolean landscape;
+	private PrintState state;
+	private int balanceConsumed;
 
     @Enumerated(EnumType.STRING)
     private PageSize paperSize;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    @Getter
-    public enum PageSize{
-        A1,A2,A3,A4
-    }
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "student_id", referencedColumnName = "id")
+	private Student student;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "print_device_id", referencedColumnName = "id")
+	private PrintDevice printDevice;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "docs_id", referencedColumnName = "id")
+	private Document document;
 }
