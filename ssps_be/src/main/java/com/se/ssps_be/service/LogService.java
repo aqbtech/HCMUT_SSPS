@@ -9,5 +9,6 @@ import org.springframework.data.domain.Page;
 public interface LogService {
 	LogInfo createLogInfo(PrintJob printJob);
 	void saveLogInfo(LogInfo logInfo);
-	Page<LogLine> getLogForStudent(String token, int page, int size);
+	Page<LogLine> getLogForStudent(String username, int page, int size);
+	Page<LogLine> getAllLogs(int page, int size);
 }

@@ -29,12 +29,12 @@ public class PrintImpl implements PrintService {
 
 	@Override
 	@Transactional
-	public void printDocument(String token, PrintRequest printRequest) {
+	public void printDocument(String username, PrintRequest printRequest) {
 		// check balance remaining page of student compared to the number of pages of the document in the print job
 		// do the print job log to console(for stimulation)
 		// log the print job to db
 		// update the balance remaining page of student
-		Student student = studentRepo.findByUsername(token)
+		Student student = studentRepo.findByUsername(username)
 				.orElseThrow(() -> new RuntimeException("Student not found"));
 		Document document = documentRepo.findById(printRequest.getDocsId())
 				.orElseThrow(() -> new RuntimeException("Document not found"));

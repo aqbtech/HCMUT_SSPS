@@ -6,5 +6,6 @@ import java.io.IOException;
 
 public interface DocumentService {
 	void saveDocument(String username, MultipartFile file) throws IOException;
-	void renameDocument(String id, String name);
+	void renameDocument(String id,String username, String name);
+	void deleteDocument(String id, String username);
 }

@@ -1,5 +1,6 @@
 package com.se.ssps_be.dto;
 
+import com.se.ssps_be.entity.Location;
 import lombok.*;
 
 import java.util.Date;
@@ -12,9 +13,8 @@ public class LogLine {
 	private Date date;
 	private String fileName;
 	private String printer;
-	private String place;
+	private Location location;
 	private int numberOfCopy;
-	private String pageRange;
 	private String pageType;
 	private String layout;
 	private int cost; // in page

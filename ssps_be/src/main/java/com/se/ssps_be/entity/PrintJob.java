@@ -48,4 +48,6 @@ public class PrintJob {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "docs_id", referencedColumnName = "id")
 	private Document document;
+	@OneToOne(fetch = FetchType.LAZY)
+	private LogInfo logInfo;
 }

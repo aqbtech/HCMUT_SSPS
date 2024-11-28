@@ -58,9 +58,14 @@ public class DocumentProvider implements DocumentService {
 	}
 
 	@Override
-	public void renameDocument(String id, String name) {
-		var doc = documentRepo.findById(Long.parseLong(id)).orElseThrow();
+	public void renameDocument(String id,String username, String name) {
+		var doc = documentRepo.findByIdAndStudent_Username(Long.parseLong(id), username).orElseThrow();
 		doc.setName(name);
 		documentRepo.save(doc);
+	}
+
+	@Override
+	public void deleteDocument(String id, String username) {
+		documentRepo.deleteByIdAndStudent_Username(Long.parseLong(id), username);
 	}
 }

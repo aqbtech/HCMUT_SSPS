@@ -12,6 +12,16 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@NamedEntityGraph(name = "student-log", attributeNodes = {
+		@NamedAttributeNode(value = "printJob", subgraph = "printJob-log"),
+		},
+		subgraphs = {
+				@NamedSubgraph(name = "printJob-log", attributeNodes = {
+						@NamedAttributeNode(value = "logInfo"),
+						@NamedAttributeNode(value = "document"),
+						@NamedAttributeNode(value = "printDevice")
+				})}
+)
 @Entity
 @Table(name = "student")
 public class Student {

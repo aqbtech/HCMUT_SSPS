@@ -4,20 +4,26 @@ import com.se.ssps_be.dto.LogLine;
 import com.se.ssps_be.entity.LogInfo;
 import com.se.ssps_be.entity.PrintJob;
 import com.se.ssps_be.entity.Student;
+import com.se.ssps_be.mapper.PrintJob2Log;
 import com.se.ssps_be.repo.LogInfoRepo;
+import com.se.ssps_be.repo.StudentRepo;
 import com.se.ssps_be.service.LogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class Logger implements LogService {
 	private final LogInfoRepo logInfoRepo;
+	private final StudentRepo studentRepo;
 	@Override
 	public LogInfo createLogInfo(PrintJob printJob) {
 		// date mssv name file name printer place number of copy status
@@ -34,9 +40,18 @@ public class Logger implements LogService {
 	public void saveLogInfo(LogInfo logInfo) {
 		logInfoRepo.save(logInfo);
 	}
+	private final PrintJob2Log printJob2Log;
+	@Override
+	public Page<LogLine> getLogForStudent(String username, int page, int size) {
+		Student student = studentRepo.findStudentByUsername(username)
+				.orElseThrow(() -> new IllegalArgumentException("Student not found"));
+		List<PrintJob> printJobs = student.getPrintJob();
+		Page<PrintJob> printJobsPage = new PageImpl<>(printJobs, PageRequest.of(page, size), printJobs.size());
+		return printJob2Log.toLogLinePage(printJobsPage);
+	}
 
 	@Override
-	public Page<LogLine> getLogForStudent(String token, int page, int size) {
+	public Page<LogLine> getAllLogs(int page, int size) {
 		return null;
 	}
 }

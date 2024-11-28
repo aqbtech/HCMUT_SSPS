@@ -2,12 +2,13 @@ package com.se.ssps_be.controller;
 
 import com.se.ssps_be.dto.PrintRequest;
 import com.se.ssps_be.service.PrintService;
+import com.se.ssps_be.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.web.header.Header;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/print")
@@ -15,8 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class PrintApi {
 	private final PrintService printService;
 	@PostMapping("/create")
-	public ResponseEntity<?> doPrint(@RequestBody PrintRequest printRequest) {
-		printService.printDocument("Bogart", printRequest);
+	public ResponseEntity<?> doPrint(
+			@RequestHeader(value = "Authorization") String authorizationHeader,
+			@RequestBody PrintRequest printRequest) {
+		String jwtToken = authorizationHeader.startsWith("Bearer ")
+				? authorizationHeader.substring(7)
+				: authorizationHeader;
+
+		// Lấy subject từ token
+		String username = JwtUtils.extractSubject(jwtToken);
+
+		printService.printDocument(username, printRequest);
+
 		return ResponseEntity.ok().build();
 	}
+
 }
