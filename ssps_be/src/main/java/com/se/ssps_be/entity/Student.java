@@ -36,6 +36,7 @@ public class Student {
     private List<Transaction> transactions;
 
 	private Long remainingBalance;
+	private int usedPage = 0;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "student")
 	private List<PrintJob> printJob;
