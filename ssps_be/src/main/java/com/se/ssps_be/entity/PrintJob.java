@@ -32,6 +32,7 @@ public class PrintJob {
 	private boolean landscape;
 	private PrintState state;
 	private int balanceConsumed;
+	private int totalPages;
 
     @Enumerated(EnumType.STRING)
     private PaperSize paperSize;

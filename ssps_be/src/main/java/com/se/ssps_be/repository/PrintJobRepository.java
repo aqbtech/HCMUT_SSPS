@@ -1,7 +1,7 @@
 package com.se.ssps_be.repository;
 
+import com.se.ssps_be.entity.PrintDevice;
 import com.se.ssps_be.entity.PrintJob;
-import com.se.ssps_be.entity.Printer;
 import com.se.ssps_be.entity.Student;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,5 +22,5 @@ public interface PrintJobRepository extends JpaRepository<PrintJob, Long> {
     @EntityGraph(value = "printjob", type = EntityGraph.EntityGraphType.FETCH)
     List<PrintJob> findByStudent(Student student);
     @EntityGraph(value = "printjob", type = EntityGraph.EntityGraphType.FETCH)
-    List<PrintJob> findByPrinter(Printer printer);
+    List<PrintJob> findByPrintDevice(PrintDevice printer);
 }

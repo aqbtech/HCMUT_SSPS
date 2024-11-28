@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/spso")
+@RequestMapping(value = "/api/v1/spso")
 public class SPSOController {
     @Autowired
     private final SPSOService spsoService;
@@ -121,7 +121,7 @@ public class SPSOController {
     }
 
     @GetMapping("/printerjob/printer/{printerId}")
-    public ResponseAPITemplate<List<PrintJobResponse>> getPrintJobsByPrinter(@PathVariable String printerId) {
+    public ResponseAPITemplate<List<PrintJobResponse>> getPrintJobsByPrinter(@PathVariable Long printerId) {
         List<PrintJobResponse> jobs = spsoService.getPrintJobsByPrinter(printerId);
         return ResponseAPITemplate.<List<PrintJobResponse>>builder()
                 .result(jobs)
