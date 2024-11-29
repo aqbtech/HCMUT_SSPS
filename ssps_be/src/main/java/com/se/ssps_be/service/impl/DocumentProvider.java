@@ -2,8 +2,10 @@ package com.se.ssps_be.service.impl;
 
 import com.se.ssps_be.entity.DocsType;
 import com.se.ssps_be.entity.PdfDocs;
+import com.se.ssps_be.entity.Student;
 import com.se.ssps_be.entity.WordDocs;
 import com.se.ssps_be.repo.DocumentRepo;
+import com.se.ssps_be.repo.StudentRepo;
 import com.se.ssps_be.service.DocumentService;
 import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -19,6 +21,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class DocumentProvider implements DocumentService {
 	private final DocumentRepo documentRepo;
+	private final StudentRepo studentRepo;
 	private int getPdfPageCount(byte[] pdfContent) throws IOException {
 		try (PDDocument pdfDocument = PDDocument.load(pdfContent)) {
 			return pdfDocument.getNumberOfPages();
@@ -32,6 +35,8 @@ public class DocumentProvider implements DocumentService {
 	}
 	@Override
 	public void saveDocument(String username, MultipartFile file) throws IOException {
+		Student student = studentRepo.findStudentByUsername(username)
+				.orElseThrow(()-> new IllegalArgumentException("Student not found"));
 		if (Objects.equals(file.getContentType(), "application/pdf")) {
 			var pdfContent = file.getBytes();
 			var pdfPageCount = getPdfPageCount(pdfContent);
@@ -41,6 +46,7 @@ public class DocumentProvider implements DocumentService {
 			docs.extension("pdf");
 			docs.totalPages(pdfPageCount);
 			docs.type(DocsType.PDF);
+			docs.student(student);
 			documentRepo.save(docs.build());
 		} else if (Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
 			var wordContent = file.getBytes();
@@ -51,6 +57,7 @@ public class DocumentProvider implements DocumentService {
 			docs.fileType("docx");
 			docs.totalPages(wordPageCount);
 			docs.type(DocsType.WORD);
+			docs.student(student);
 			documentRepo.save(docs.build());
 		} else {
 			throw new IllegalArgumentException("Invalid file type");
