@@ -1,53 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Finger+Paint&family=Inter:wght@500&display=swap');
+@import url('https://fonts.bunny.net/css2?family=Roboto:wght@100,400,900&family=Poppins:wght@100,400,900&display=swap');
 
-body {
-  margin: 0;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Đặt font mặc định là Roboto */
+* {
+    font-family: 'Roboto', sans-serif;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Font chữ riêng cho các tiêu đề hoặc nội dung cần nổi bật */
+.heading-font {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
 }
-
-/* responsive media */
-img,
-picture,
-video {
-  max-width: 100%;
-  max-height: 100%;
-}
-
-/* global normalizing */
-button,
-label,
-input:not(input[type="radio"], input[type="checkbox"]),
-select,
-progress,
-meter,
-textarea {
+a.active hr{
     display: block;
-    font-family: inherit;
-    font-size: 100%;
-    margin: 0;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 5px;
-    height: 30px;
 }
 
-/* uniform shadow and rounded corners */
+.prata-regular {
+    font-family: "Prata", serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
 
-input[type="text"],
-input[type="datetime-local"],
-input[type="color"],
-input[type="email"],
-input[type="password"],
-select {
-    box-shadow: inset 1px 1px 3px #ccc;
-    border-radius: 5px;
-}
+  ::-webkit-scrollbar{
+
+  }
+

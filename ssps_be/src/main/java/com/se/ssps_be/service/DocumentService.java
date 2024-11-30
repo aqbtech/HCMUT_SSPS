@@ -8,4 +8,5 @@ public interface DocumentService {
 	void saveDocument(String username, MultipartFile file) throws IOException;
 	void renameDocument(String id,String username, String name);
 	void deleteDocument(String id, String username);
+	Integer getPageCount(Long docId, String username);
 }

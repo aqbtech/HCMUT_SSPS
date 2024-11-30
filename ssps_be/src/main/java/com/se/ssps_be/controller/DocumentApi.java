@@ -78,4 +78,27 @@ public class DocumentApi {
 		documentRepo.deleteById(Long.parseLong(id));
 		return ResponseEntity.ok(id);
 	}
+	@PostMapping("/download")
+	public ResponseEntity<?> downloadDocument(@RequestHeader(value = "Authorization") String authorizationHeader,@RequestParam String id) {
+		String jwtToken = authorizationHeader.startsWith("Bearer ")
+				? authorizationHeader.substring(7)
+				: authorizationHeader;
+
+		// Lấy subject từ token
+		String username = JwtUtils.extractSubject(jwtToken);
+//		documentProvider.downloadDocument(id, username);
+		return ResponseEntity.ok(id);
+	}
+	@GetMapping("page-count")
+	public ResponseEntity<?> getPageCount(@RequestHeader(value = "Authorization") String authorizationHeader,
+										   @RequestParam(value = "docid") Long docId) {
+		String jwtToken = authorizationHeader.startsWith("Bearer ")
+				? authorizationHeader.substring(7)
+				: authorizationHeader;
+
+		// Lấy subject từ token
+		String username = JwtUtils.extractSubject(jwtToken);
+
+		return ResponseEntity.ok(documentProvider.getPageCount(docId, username));
+	}
 }

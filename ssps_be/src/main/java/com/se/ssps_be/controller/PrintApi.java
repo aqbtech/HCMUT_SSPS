@@ -26,9 +26,9 @@ public class PrintApi {
 		// Lấy subject từ token
 		String username = JwtUtils.extractSubject(jwtToken);
 
-		printService.printDocument(username, printRequest);
+		var state = printService.printDocument(username, printRequest);
 
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(state);
 	}
 
 }

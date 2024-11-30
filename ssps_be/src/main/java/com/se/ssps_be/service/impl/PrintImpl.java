@@ -7,6 +7,7 @@ import com.se.ssps_be.repo.DocumentRepo;
 import com.se.ssps_be.repo.PrintDeviceRepo;
 import com.se.ssps_be.repo.PrintJobRepo;
 import com.se.ssps_be.repo.StudentRepo;
+import com.se.ssps_be.repository.SystemConfigRepository;
 import com.se.ssps_be.service.LogService;
 import com.se.ssps_be.service.PrintDevicePhysic;
 import com.se.ssps_be.service.PrintService;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,10 +28,11 @@ public class PrintImpl implements PrintService {
 	private final PrintJobMapper printJobMapper;
 	private final PrintDeviceRepo printDeviceRepo;
 	private final PrintDevicePhysic printDevicePhysic;
+	private final SystemConfigRepository systemConfigRepository;
 
 	@Override
 	@Transactional
-	public void printDocument(String username, PrintRequest printRequest) {
+	public PrintState printDocument(String username, PrintRequest printRequest) {
 		// check balance remaining page of student compared to the number of pages of the document in the print job
 		// do the print job log to console(for stimulation)
 		// log the print job to db
@@ -45,11 +48,22 @@ public class PrintImpl implements PrintService {
 		// calculate balance of print request
 		int printedPages = getPrintedPages(printRequest, document);
 		int balance = printRequest.getNumberOfCopies() * printedPages;
+		int usedPage = student.getUsedPage();
+		int defaultpage = systemConfigRepository.findByActiveIsTrue()
+				.orElseThrow(() -> new RuntimeException("System Config has some error!"))
+				.getDefaultPagesPerSemester();
+		if(usedPage + document.getTotalPages() > defaultpage){
+			throw new IllegalArgumentException("Request was denied cause your page does not enough");
+		}
 
 		printJob.setBalanceConsumed(balance);
 		printJob.setDocument(document);
 		printJob.setStudent(student);
 		printJob.setPrintDevice(printDevice);
+		printJob.setTotalPages(document.getTotalPages());
+		printJob.setStartTime(LocalDateTime.now());
+		LocalDateTime endTime = LocalDateTime.now().plusMinutes(document.getTotalPages());
+		printJob.setEndTime(endTime);
 
 		// call print device to stimulate print job and return print job state
 		var state = printDevicePhysic.print(printJob);
@@ -62,14 +76,16 @@ public class PrintImpl implements PrintService {
 			printJob.setState(PrintState.NOT_ENOUGH_BALANCE);
 //			throw new IllegalArgumentException("Not enough balance"); // TODOd: also log to db
 		}
+		printJob.setLogInfo(logInfo);
 
 		printJobRepo.save(printJob);
 		logService.saveLogInfo(logInfo);
 		if (state != PrintState.PRINTED) {
-			return;
+			return state;
 		}
 		student.setRemainingBalance(student.getRemainingBalance() - balance);
 		studentRepo.save(student);
+		return state;
 	}
 
 	private int getPrintedPages(PrintRequest printRequest, Document document) {
