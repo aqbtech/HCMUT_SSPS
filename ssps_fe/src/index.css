@@ -1,0 +1,32 @@
+@import url('https://fonts.bunny.net/css2?family=Roboto:wght@100,400,900&family=Poppins:wght@100,400,900&display=swap');
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Đặt font mặc định là Roboto */
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Font chữ riêng cho các tiêu đề hoặc nội dung cần nổi bật */
+.heading-font {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+a.active hr{
+    display: block;
+}
+
+.prata-regular {
+    font-family: "Prata", serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+
+  ::-webkit-scrollbar{
+
+  }
+
