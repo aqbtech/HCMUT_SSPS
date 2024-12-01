@@ -35,7 +35,7 @@ public class PrintDeviceApi {
 		return ResponseEntity.ok(updatedPrinter);
 	}
 	@DeleteMapping("/delete-printer")
-	public ResponseEntity<?> deletePrinter(@RequestParam Long id) {
+	public ResponseEntity<?> deletePrinter(@RequestParam String id) {
 		printDeviceRepo.deleteById(id);
 		return ResponseEntity.ok().build();
 	}

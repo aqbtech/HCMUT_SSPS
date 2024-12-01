@@ -4,9 +4,11 @@ import com.se.ssps_be.dto.request.AddPrinterRequest;
 import com.se.ssps_be.dto.request.NewSystemConfigRequest;
 import com.se.ssps_be.dto.request.ToggleePrinterStatusRequest;
 import com.se.ssps_be.dto.response.*;
+import com.se.ssps_be.entity.PrintJobReport;
 import com.se.ssps_be.service.SPSOService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -121,7 +123,7 @@ public class SPSOController {
     }
 
     @GetMapping("/printerjob/printer/{printerId}")
-    public ResponseAPITemplate<List<PrintJobResponse>> getPrintJobsByPrinter(@PathVariable Long printerId) {
+    public ResponseAPITemplate<List<PrintJobResponse>> getPrintJobsByPrinter(@PathVariable String printerId) {
         List<PrintJobResponse> jobs = spsoService.getPrintJobsByPrinter(printerId);
         return ResponseAPITemplate.<List<PrintJobResponse>>builder()
                 .result(jobs)
@@ -134,6 +136,14 @@ public class SPSOController {
         LocalDate date = month.orElse(now).atDay(1);
         Report report = spsoService.getreport(date);
         return ResponseAPITemplate.<Report>builder()
+                .result(report)
+                .build();
+    }
+
+    @GetMapping("/report/year")
+    public ResponseAPITemplate<List<Report>> getYearReport(@RequestParam("year") Optional<String> year){
+        List<Report> report = spsoService.getYearReport(year.orElse(String.valueOf(LocalDate.now().getYear())));
+        return ResponseAPITemplate.<List<Report>>builder()
                 .result(report)
                 .build();
     }
