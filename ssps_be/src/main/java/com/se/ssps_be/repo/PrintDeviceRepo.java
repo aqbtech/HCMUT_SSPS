@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PrintDeviceRepo extends JpaRepository<PrintDevice, Long> {
+public interface PrintDeviceRepo extends JpaRepository<PrintDevice, String> {
     @Query("select p from PrintDevice p " +
             "where p.status = :status")
     List<PrintDevice> findByStatus(@Param("status") String status);

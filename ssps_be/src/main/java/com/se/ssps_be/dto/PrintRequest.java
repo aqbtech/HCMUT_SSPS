@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class PrintRequest {
 	private Long docsId;
-	private Long printDeviceId;
+	private String printDeviceId;
 	private PaperSize paperSize;
 	private int numberOfCopies;
 	private String pageRange; // accepted format: all, even, old, custom(min-max: 1-3,5,7-9)

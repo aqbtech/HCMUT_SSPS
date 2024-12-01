@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class PrinterResponse {
-    private Long printerId;
+    private String printerId;
     private String brand;
     private String model;
     private String description;

@@ -3,6 +3,7 @@ package com.se.ssps_be.repo;
 import com.se.ssps_be.entity.PrintDevice;
 import com.se.ssps_be.entity.PrintJob;
 import com.se.ssps_be.entity.Student;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
