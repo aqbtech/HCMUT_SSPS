@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class ToggleePrinterStatusRequest {
-    public Long printerId;
+    public String printerId;
     public boolean status;
 }

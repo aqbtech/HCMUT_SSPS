@@ -12,8 +12,8 @@ import java.util.List;
 @Entity
 public class PrintDevice {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private String id;
 	private String name;
 	@Embedded
 	private Location location;

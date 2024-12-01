@@ -39,7 +39,7 @@ public class SPSOServiceImpl implements SPSOService {
     private final PrintJobReportRepository printJobReportRepository;
 
     @Override
-    public String updatePrinterStatus(Long printerId, boolean status) {// Cập nhật trạng thái máy in (bật/tắt)
+    public String updatePrinterStatus(String printerId, boolean status) {// Cập nhật trạng thái máy in (bật/tắt)
         try {
             Optional<PrintDevice> printerOpt = printerRepository.findById(printerId);
             if (printerOpt.isPresent()) {
@@ -232,7 +232,7 @@ public class SPSOServiceImpl implements SPSOService {
     }
 
     @Override
-    public List<PrintJobResponse> getPrintJobsByPrinter(Long printerId) {
+    public List<PrintJobResponse> getPrintJobsByPrinter(String printerId) {
         PrintDevice printer = printerRepository.findById(printerId)
                 .orElseThrow(()->new WebServerException(ErrorCode.PRINT_NOT_FOUND));
         List<PrintJob> printJobs = printJobRepository.findByPrintDevice(printer);
@@ -241,6 +241,21 @@ public class SPSOServiceImpl implements SPSOService {
             responses.add(this.mapToPrintJobResponse(printJob));
         }
         return responses;
+    }
+
+    @Override
+    public List<Report> getYearReport(String year){
+        List<PrintJobReport> reports = printJobReportRepository.findPrintJobReportByYear(year);
+        List<Report> response = new ArrayList<>();
+        for(PrintJobReport report: reports){
+            response.add(Report.builder()
+                            .month(report.getMonth())
+                            .totalJobs(report.getTotalJobs())
+                            .totalPages(report.getTotalPages())
+                            .totalJobs(report.getTotalJobs())
+                    .build());
+        }
+        return response;
     }
 
     public Report getreport(LocalDate month) {
@@ -263,8 +278,8 @@ public class SPSOServiceImpl implements SPSOService {
         return report;
     }
     @Override
-//    @Scheduled(cron = "0 0 0 1 * *") // Chạy vào 0h00 ngày đầu tiên mỗi tháng
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 0 0 1 * *") // Chạy vào 0h00 ngày đầu tiên mỗi tháng
+//    @Scheduled(fixedRate = 60000)
     public void generateMonthlyReportAutomatically() {
         // Xác định tháng cần báo cáo (tháng trước)
         LocalDate now = LocalDate.now();

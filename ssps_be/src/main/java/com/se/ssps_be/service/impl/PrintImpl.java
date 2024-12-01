@@ -43,6 +43,9 @@ public class PrintImpl implements PrintService {
 				.orElseThrow(() -> new RuntimeException("Document not found"));
 		PrintDevice printDevice = printDeviceRepo.findById(printRequest.getPrintDeviceId())
 				.orElseThrow(() -> new RuntimeException("Print device not found"));
+		if(printDevice.getStatus().equals("disabled")){
+			throw new IllegalArgumentException("This printer is not enabled");
+		}
 		PrintJob printJob = printJobMapper.toPrintJob(printRequest);
 
 		// calculate balance of print request
@@ -77,7 +80,7 @@ public class PrintImpl implements PrintService {
 //			throw new IllegalArgumentException("Not enough balance"); // TODOd: also log to db
 		}
 		printJob.setLogInfo(logInfo);
-
+		printJob.setLogInfo(logInfo);
 		printJobRepo.save(printJob);
 		logService.saveLogInfo(logInfo);
 		if (state != PrintState.PRINTED) {
