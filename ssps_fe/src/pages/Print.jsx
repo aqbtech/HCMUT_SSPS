@@ -15,10 +15,10 @@ const Print = () => {
     pageType: 'single',
     layout: 'portrait',
   });
-  useEffect(()=> {
-    const token = Cookies.get("TOKEN");
-    if(!token) window.location.href = "http://localhost:8081/sso/login";
-  })
+  // useEffect(()=> {
+  //   const token = Cookies.get("TOKEN");
+  //   if(!token) window.location.href = "http://localhost:8081/sso/login";
+  // })
   // Thêm state để lưu số trang của tài liệu
   const [docTotalPages, setDocTotalPages] = useState(1);
   const [listDevices, setListDevices] = useState([]);

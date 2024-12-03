@@ -10,7 +10,10 @@ import History from './pages/History.jsx';
 import MyDoc from './pages/MyDoc.jsx';
 import Printer from './pages/Printer.jsx';
 import Print from './pages/Print.jsx';
-
+import SPSO_home from './pages/SPSO_home.jsx';
+import Printer_Manage from './pages/Printer_Manage.jsx';
+import SPSO_history from './pages/SPSO_history.jsx';
+import SPSO_report from './pages/SPSO_report.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -21,7 +24,10 @@ function App() {
           <ToastContainer/>
           <Routes>
             <Route path='/' element={<Home/>}/>
-            <Route path='/student/home' element={<Student_home/>} />
+            <Route path='/spso/home' element={<SPSO_home/>}/>
+            <Route path='/spso/manage' element={<Printer_Manage/>}/>
+            <Route path='/spso/history' element={<SPSO_history/>}/>
+            <Route path='/spso/report' element={<SPSO_report/>}/>
             <Route path='/student/home' element={<Student_home/>} />
             <Route path='/student/print' element={<Print/>} />
             <Route path='/student/printer' element={<Printer/>} />
