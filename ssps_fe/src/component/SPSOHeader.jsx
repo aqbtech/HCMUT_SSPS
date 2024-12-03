@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 export default function StudentHeader() {
     const navigate = useNavigate();
     const items = [
-        { text: "Trang chủ", link: "/student/home" },
-        { text: "In tài liệu", link: "/student/print" },
-        { text: "Lịch sử in", link: "/student/history" },
-        { text: "Tài liệu của bạn", link: "/student/myDoc" },
+        { text: "Trang chủ", link: "/spso/home" },
+        { text: "Quản lí máy in", link: "/spso/manage" },
+        { text: "Lịch sử in", link: "/spso/history" },
+        { text: "Tạo báo cáo", link: "/spso/report" },
     ];
 
     function handleLogoClick() {
-        navigate("/student/home");
+        navigate("/spso/home");
     }
 
 

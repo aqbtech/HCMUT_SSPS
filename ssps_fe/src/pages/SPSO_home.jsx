@@ -1,12 +1,12 @@
-import StudentHeader from "../component/StudentHeader";
+import SPSOHeader from "../component/SPSOHeader";
 import bgImage from "../assets/bk.jpg"; 
 
-export default function StudentHome() {
+export default function SPSO_home() {
  
 
   return (
       <>
-     <StudentHeader />
+     <SPSOHeader />
       <div
         className="student-homepage h-screen w-full bg-cover bg-center relative"
         style={{ backgroundImage: `url(${bgImage})` }}

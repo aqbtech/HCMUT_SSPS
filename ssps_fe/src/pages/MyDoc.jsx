@@ -9,10 +9,10 @@ const MyDoc = () => {
   const [size, setSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [file, setFile] = useState(null);
-  useEffect(()=> {
-    const token = Cookies.get("TOKEN");
-    if(!token) window.location.href = "http://localhost:8081/sso/login";
-  })
+  // useEffect(()=> {
+  //   const token = Cookies.get("TOKEN");
+  //   if(!token) window.location.href = "http://localhost:8081/sso/login";
+  // })
   const fetchDocs = async (page = 0, size = 10) => {
     const result = await sendGetRequest('/api/v1/document/all-documents', { page, size });
     if (result) {

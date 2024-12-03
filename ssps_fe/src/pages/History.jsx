@@ -7,10 +7,10 @@ const History = () => {
   const [history, setHistory] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  useEffect(()=> {
-    const token = Cookies.get("TOKEN");
-    if(!token) window.location.href = "http://localhost:8081/sso/login";
-  })
+  // useEffect(()=> {
+  //   const token = Cookies.get("TOKEN");
+  //   if(!token) window.location.href = "http://localhost:8081/sso/login";
+  // })
   // Fetch dữ liệu từ API
   useEffect(() => {
     const fetchHistory = async () => {
