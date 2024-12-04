@@ -1,6 +1,6 @@
 import LogoHCMUT from "./logoHCMUT.jsx"
 import { useNavigate } from "react-router-dom";
-
+import Cookies from 'js-cookie';
 export default function StudentHeader() {
     const navigate = useNavigate();
     const items = [
@@ -11,30 +11,41 @@ export default function StudentHeader() {
     ];
 
     function handleLogoClick() {
-        navigate("/student/home");
+        navigate("/student/info");
     }
 
-
+    const handleLogout = () => {
+    Cookies.remove('TOKEN'); // Remove the token cookie
+    window.location.href = "http://localhost:8081/sso/login"; // Redirect to the login page
+  };
 
     return (
-        <header className="flex items-center w-full bg-blue-600">
-            {/* Logo Section */}
-            <div className="cursor-pointer mr-24" onClick={handleLogoClick}>
-                <LogoHCMUT />
-            </div>
+        <header className="flex flex-wrap items-center justify-between w-full bg-[#252836] p-6 shadow-lg overflow-hidden">
+      {/* Logo Section */}
+      <div className="cursor-pointer mb-4 md:mb-0" onClick={handleLogoClick}>
+        <LogoHCMUT />
+      </div>
 
-            {/* Navigation Bar */}
-            <nav className="flex items-center space-x-32">
-                {items.map((item, index) => (
-                    <a
-                        key={index}
-                        href={item.link}
-                        className="text-gray-800 hover:text-blue-500 transition px-4 py-2 font-semibold shadow-sm"
-                    >
-                        {item.text}
-                    </a>
-                ))}
-            </nav>
-        </header>
+      {/* Navigation Bar */}
+      <nav className="flex flex-wrap items-center space-y-4 md:space-y-0 md:space-x-4">
+        {items.map((item, index) => (
+          <a
+            key={index}
+            href={item.link}
+            className="flex items-center justify-center w-full md:w-[16.75rem] h-[4.3125rem] bg-[#EA7C69] text-white font-semibold rounded-full transition hover:bg-[#d96b5a]"
+          >
+            {item.text}
+          </a>
+        ))}
+      </nav>
+
+      {/* Logout Button */}
+      <button
+        onClick={handleLogout}
+        className="mt-4 md:mt-0 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Logout
+      </button>
+    </header>
     );
 }
