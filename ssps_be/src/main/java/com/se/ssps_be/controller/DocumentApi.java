@@ -2,12 +2,14 @@ package com.se.ssps_be.controller;
 
 import com.se.ssps_be.dto.DocsEle;
 import com.se.ssps_be.dto.UpdateDocsNameReq;
+import com.se.ssps_be.entity.Document;
 import com.se.ssps_be.mapper.DocsMapper;
 import com.se.ssps_be.repo.DocumentRepo;
 import com.se.ssps_be.service.impl.DocumentProvider;
 import com.se.ssps_be.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/document")
@@ -34,11 +37,12 @@ public class DocumentApi {
 		String jwtToken = authorizationHeader.startsWith("Bearer ")
 				? authorizationHeader.substring(7)
 				: authorizationHeader;
-
 		// Lấy subject từ token
 		String username = JwtUtils.extractSubject(jwtToken);
 		Pageable pageable = PageRequest.of(page, size);
-		var documents = documentRepo.findByStudent_Username(username, pageable);
+		var documentpage = documentRepo.findByStudent_Username(username, pageable);
+		List<Document> documentList = documentRepo.findByStudent_Username(username, pageable).stream().filter(document -> document.getDeleted().equals(Boolean.FALSE)).toList();
+		Page<Document> documents = new PageImpl<>(documentList, pageable, documentpage.getTotalElements());
 		return ResponseEntity.ok(docsMapper.toDocsElePage(documents));
 	}
 
@@ -75,7 +79,10 @@ public class DocumentApi {
 
 		// Lấy subject từ token
 		String username = JwtUtils.extractSubject(jwtToken);
-		documentRepo.deleteById(Long.parseLong(id));
+		Document document = documentRepo.findById(Long.valueOf(id))
+				.orElseThrow(() -> new RuntimeException("Document not found"));
+		document.setDeleted(Boolean.TRUE);
+		documentRepo.save(document);
 		return ResponseEntity.ok(id);
 	}
 	@PostMapping("/download")

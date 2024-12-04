@@ -48,6 +48,7 @@ public class DocumentProvider implements DocumentService {
 			docs.extension("pdf");
 			docs.totalPages(pdfPageCount);
 			docs.type(DocsType.PDF);
+			docs.deleted(Boolean.FALSE);
 			docs.student(student);
 			documentRepo.save(docs.build());
 		} else if (Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
@@ -59,6 +60,7 @@ public class DocumentProvider implements DocumentService {
 			docs.fileType("docx");
 			docs.totalPages(wordPageCount);
 			docs.type(DocsType.WORD);
+			docs.deleted(Boolean.FALSE);
 			docs.student(student);
 			documentRepo.save(docs.build());
 		} else {
@@ -69,6 +71,9 @@ public class DocumentProvider implements DocumentService {
 	@Override
 	public void renameDocument(String id,String username, String name) {
 		var doc = documentRepo.findByIdAndStudent_Username(Long.parseLong(id), username).orElseThrow();
+		if(doc.getDeleted()){
+			throw new IllegalArgumentException("Document is deleted");
+		}
 		doc.setName(name);
 		documentRepo.save(doc);
 	}
@@ -81,6 +86,9 @@ public class DocumentProvider implements DocumentService {
 	public Integer getPageCount(Long docId, String username) {
 		var doc = documentRepo.findByIdAndStudent_Username(docId, username)
 				.orElseThrow(() -> new WebServerException(ErrorCode.DOCUMENT_NOT_FOUND));
+		if(doc.getDeleted()){
+			throw new IllegalArgumentException("Document is deleted");
+		}
 		return doc.getTotalPages();
 
 	}
