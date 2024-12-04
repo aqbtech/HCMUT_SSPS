@@ -14,6 +14,7 @@ import SPSO_home from './pages/SPSO_home.jsx';
 import Printer_Manage from './pages/Printer_Manage.jsx';
 import SPSO_history from './pages/SPSO_history.jsx';
 import SPSO_report from './pages/SPSO_report.jsx';
+import StudentInfo from './pages/StudentInfo.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -30,12 +31,12 @@ function App() {
             <Route path='/spso/report' element={<SPSO_report/>}/>
             <Route path='/student/home' element={<Student_home/>} />
             <Route path='/student/print' element={<Print/>} />
+            <Route path='/student/info' element={<StudentInfo/>} />
             <Route path='/student/printer' element={<Printer/>} />
             <Route path='/student/myDoc' element={<MyDoc/>} />
             <Route path='/student/history' element={<History/>} />
             <Route path='/student/buy' element={<Buy/>} />
           </Routes>
-          <Footer></Footer>
       </div>
   )
 }

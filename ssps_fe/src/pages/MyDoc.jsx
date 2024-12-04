@@ -37,7 +37,7 @@ const MyDoc = () => {
   };
 
   const handleUpload = async () => {
-    if (!file) return alert('Please select a file to upload.');
+    if (!file) return ;
 
     const formData = new FormData();
     formData.append('file', file);
@@ -52,12 +52,10 @@ const MyDoc = () => {
     });
 
     if (response.ok) {
-      alert('Upload thành công!');
       setFile(null); // Reset file sau khi upload
       fetchDocs(page, size); // Gọi lại danh sách tài liệu với trang hiện tại
     } else {
       console.error('Upload thất bại!', await response.text());
-      alert('Upload thất bại!');
     }
   };
 

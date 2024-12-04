@@ -55,6 +55,8 @@ const Print = () => {
     fetchDevices();
   }, []);
 
+  
+
   // Xử lý mở modal với tài liệu được chọn và lấy số trang của tài liệu
   const handlePrintClick = async (docId) => {
     setSelectedDocId(docId);
@@ -71,7 +73,7 @@ const Print = () => {
 
   // Gửi yêu cầu in
   const handlePrintSubmit = async () => {
-    if (!selectedDocId) return alert('No document selected.');
+    if (!selectedDocId) return ;
     const payload = {
       docsId: selectedDocId,
       ...printOptions,
@@ -82,10 +84,8 @@ const Print = () => {
     });
     console.log("Ket qua in:", result);
     if (result === 'PRINTED') {
-      alert('Document sent to printer successfully!');
       setModalOpen(false);
     } else {
-      alert('Failed to print document, code:' + result);
     }
   };
 
@@ -169,7 +169,9 @@ const Print = () => {
                   }
               >
                 <option value="">Select a device</option>
-                {listDevices.map((device) => (
+                {listDevices
+                .filter(device => device.description !== 'disabled')
+                .map((device) => (
                     <option key={device.printerId} value={device.printerId}>
                       {device.brand} {device.model} - {device.description}
                     </option>
@@ -186,9 +188,13 @@ const Print = () => {
                       setPrintOptions({...printOptions, paperSize: e.target.value})
                   }
               >
-                <option value="A4">A4</option>
-                <option value="A3">A3</option>
-                <option value="Letter">Letter</option>
+                {listDevices
+                .filter(device => device.description !== 'disabled')
+                .map((device) => (
+                    <option key={device.paperSize} value={device.paperSize}>
+                      {device.paperSize}
+                    </option>
+                ))}
               </select>
             </div>
             <div className="mb-4">

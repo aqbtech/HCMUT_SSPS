@@ -2,6 +2,8 @@ import React, { useState,useEffect } from 'react';
 import SPSOHeader from '../component/SPSOHeader';
 import sendRequest, {sendGetRequest} from '../API/fetchAPI';
 import Modal from 'react-modal';
+import Cookies from "js-cookie";
+import { sendRefreshRequest } from '../API/fetchAPI';
 
 const Printer_Manage = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -18,24 +20,35 @@ const Printer_Manage = () => {
     remainingBlackInk: 'false',
     supportedPaperSize: 'A4'
   });
-  const [printers, setPrinters] = useState([]);
 
+  const refreshToken = Cookies.get('TOKEN');
+  console.log(sendRefreshRequest(refreshToken)); //
+
+  const [printers, setPrinters] = useState([]);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     const token = Cookies.get("TOKEN");
+  //     if (!token) window.location.href = "http://localhost:8081/sso/login";
+  //   }, 3000); // Delay of 3 seconds
+
+  //   return () => clearTimeout(timer); // Cleanup the timeout if the component unmounts
+  // }, []);
+  // Fetch dữ liệu từ API
+  const [notification, setNotification] = useState(null);
   const [configData, setConfigData] = useState({
     defaultPagesPerSemester: 100,
     allowedFileTypes: ['pdf', 'docx'],
     defaultStartDateForPages: '2025-01-01'
   });
 
-  useEffect(() => {
     // Fetch the list of printers from the backend
     const fetchPrinters = async () => {
-      const response = await sendGetRequest('GET', '/api/v1/spso/printer');
+      const response = await sendGetRequest('/api/v1/spso/printer', 'GET');
       if (response && response.result) {
         setPrinters(response.result);
       }
     };
     fetchPrinters();
-  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -52,11 +65,12 @@ const Printer_Manage = () => {
       remainingBlackInk: formData.remainingBlackInk === 'true',
       supportedPaperSize: [formData.supportedPaperSize]
     };
-    sendRequest('/api/v1/spso/printer/add', 'POST', payload)
+    sendRequest('POST', `/api/v1/spso/printer/add`, payload)
       .then(response => {
         console.log(response);
         if (response.code === 200) {
-          alert(response.result);
+          setNotification('Thêm máy in thành công');
+          setTimeout(() => setNotification(null), 2000);
           fetchPrinters();
         }
       })
@@ -78,13 +92,18 @@ const Printer_Manage = () => {
     e.preventDefault();
     const payload = {
       ...configData,
-      allowedFileTypes: configData.allowedFileTypes.split(',')
+      allowedFileTypes: typeof configData.allowedFileTypes === 'string'
+
+        ? configData.allowedFileTypes.split(',')
+
+        : configData.allowedFileTypes
+
+
     };
-    sendRequest('/api/v1/spso/printer/config', 'POST', payload)
+    sendRequest('POST', '/api/v1/spso/printer/config', payload)
       .then(response => {
         console.log(response);
         if (response.code === 200) {
-          alert(response.message);
         }
       })
       .catch(error => {
@@ -93,45 +112,28 @@ const Printer_Manage = () => {
     setConfigModalIsOpen(false);
   };
 
-  const handleChangeState = (printerId, status) => {
+  const handleChangeState = (printerId, currentStatus) => {
+  const newStatus = currentStatus !== 'enabled';
 
-    const payload = {
-
-      printerId,
-
-      status
-
-    };
-
-    sendRequest('/api/v1/spso/printer/update_status', 'PUT', payload)
-
-      .then(response => {
-
-        console.log(response);
-
-        if (response.code === 200) {
-
-          alert(response.result);
-
-          // Refresh the printer list after changing the state
-
-          setPrinters(printers.map(printer => 
-
-            printer.printerId === printerId ? { ...printer, status } : printer
-
-          ));
-
-        }
-
-      })
-
-      .catch(error => {
-
-        console.error('Error:', error);
-
-      });
-
+  const payload = {
+    printerId,
+    newStatus
   };
+
+  sendRequest('PUT', '/api/v1/spso/printer/update_status', payload)
+    .then(response => {
+      console.log(response);
+      if (response.code === 200) {
+        // Refresh the printer list after changing the state
+        setPrinters(printers.map(printer => 
+          printer.printerId === printerId ? { ...printer, newStatus} : printer
+        ));
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+};
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
@@ -182,19 +184,12 @@ const Printer_Manage = () => {
                   <td className="py-2 px-4 border-b">
 
                     <button
-
-                      onClick={() => handleChangeState(printer.printerId, !printer.status)}
-
-                      className={`${
-
-                        printer.status ? 'bg-red-500 hover:bg-red-700' : 'bg-green-500 hover:bg-green-700'
-
-                      } text-white font-bold py-1 px-2 rounded`}
-
+                    onClick={() => handleChangeState(printer.printerId, printer.status)}
+                    className={`${
+                    printer.status === 'enabled' ? 'bg-red-500 hover:bg-red-700' : 'bg-green-500 hover:bg-green-700'
+                    } text-white font-bold py-1 px-2 rounded`}
                     >
-
-                      {printer.status ? 'Disable' : 'Enable'}
-
+                    {printer.status === 'enabled' ? 'Disable' : 'Enable'}
                     </button>
 
                   </td>
@@ -213,7 +208,7 @@ const Printer_Manage = () => {
         style={{ maxHeight: '90vh' }}
       >
         <h2 className="text-2xl font-bold mb-4">Add Printer</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[70vh]">
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="brand">
               Brand
@@ -363,6 +358,7 @@ const Printer_Manage = () => {
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              onClick={handleSubmit}
             >
               Submit
             </button>
