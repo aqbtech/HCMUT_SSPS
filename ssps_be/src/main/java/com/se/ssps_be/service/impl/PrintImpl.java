@@ -58,6 +58,9 @@ public class PrintImpl implements PrintService {
 		if(usedPage + document.getTotalPages() > defaultpage){
 			throw new IllegalArgumentException("Request was denied cause your page does not enough");
 		}
+		if(document.getDeleted()){
+			throw new IllegalArgumentException("Document is deleted");
+		}
 
 		printJob.setBalanceConsumed(balance);
 		printJob.setDocument(document);
