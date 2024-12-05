@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import StudentHeader from '../component/StudentHeader';
 import sendRequest, { sendGetRequest } from '../API/fetchAPI';
 import Cookies from 'js-cookie';
+import { useDropzone } from 'react-dropzone';
+import file_icon from '../assets/file_icon.png';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const MyDoc = () => {
   const [docs, setDocs] = useState([]);
@@ -37,7 +41,7 @@ const MyDoc = () => {
   };
 
   const handleUpload = async () => {
-    if (!file) return ;
+    if (!file) return toast.error('Please select a file to upload.');
 
     const formData = new FormData();
     formData.append('file', file);
@@ -52,10 +56,12 @@ const MyDoc = () => {
     });
 
     if (response.ok) {
+      // alert('Upload thành công!');
       setFile(null); // Reset file sau khi upload
       fetchDocs(page, size); // Gọi lại danh sách tài liệu với trang hiện tại
     } else {
       console.error('Upload thất bại!', await response.text());
+      // alert('Upload thất bại!');
     }
   };
 
@@ -65,14 +71,38 @@ const MyDoc = () => {
     }
   };
 
+  const onDrop = useCallback((acceptedFiles) => {
+    setFile(acceptedFiles[0]);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
   return (
       <div className="flex flex-col min-h-screen">
         <StudentHeader />
-        <div className="container mx-auto flex-grow py-10 px-4">
-          <h1 className="text-2xl font-bold text-center mb-6">My Documents</h1>
+            <div className="container mx-auto flex-grow py-10 px-4">
+              <h1 className="text-2xl font-bold text-center mb-6">My Documents</h1>
 
-          {/* File Upload Section */}
-          <div className="mb-8 flex items-center justify-center gap-4">
+              {/* File Upload Section */}
+              <div className="mb-8 flex items-center justify-center gap-4">
+                <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded p-4 w-full max-w-xs ${
+                isDragActive ? 'border-blue-600' : 'border-gray-300'
+              }`}
+            >
+              <input {...getInputProps()} />
+            {isDragActive ? (
+              <p className="text-blue-600">Drop the files here ...</p>
+            ) : file ? (
+              <div className="flex flex-col items-center">
+                <img icon={file_icon} size="3x" className="text-gray-600 mb-2" />
+                <p className="text-gray-600">{file.name}</p>
+              </div>
+            ) : (
+              <p className="text-gray-600">Drag 'n' drop a file here, or click to select a file</p>
+            )}
+            </div>
             <input
                 type="file"
                 onChange={(e) => setFile(e.target.files[0])}

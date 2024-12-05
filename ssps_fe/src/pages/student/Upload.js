@@ -39,6 +39,7 @@ export default function Upload() {
         .catch(error => {
             // Handle upload error
             console.error('File upload failed:', error);
+            // alert('File upload failed');
         });
     }, [docs]);
 

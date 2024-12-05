@@ -21,7 +21,7 @@ export default function Header() {
     }
 
     return (
-        <header className="w-full flex items-center justify-between px-4 py-4 bg-gray-100 shadow-md">
+        <header className="w-full flex items-center justify-between px-4 py-4 bg-blue-300 shadow-md">
             {/* Logo Section */}
             <div className="cursor-pointer" onClick={handleLogoClick}>
                 <LogoHCMUT />

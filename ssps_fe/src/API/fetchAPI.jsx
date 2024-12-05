@@ -1,6 +1,8 @@
 
 import axios from "axios";
 import Cookies from 'js-cookie'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const axiosClient = axios.create({
     baseURL: `http://localhost:8080`,
@@ -91,10 +93,10 @@ export async function sendRefreshRequest(token){
 export async function sendGetRequest(path, body) {
     try {
         const response = await axiosClient.get(`${path}`, body);
-        // return response;
         return response.data;
     } catch (error) {
         console.error("GET Request failed:", error);
+        toast.error(`GET Request failed: ${error.message}`);
         return undefined;
     }
     
@@ -107,11 +109,11 @@ export default async function sendRequest(method, path, data) {
             url: path,
             data: data, 
         });
-
-        // return response;
         return response.data;
     } catch(error) {
         console.error(`${method} Request failed:`, error);
+        toast.error(`${method} Request failed: ${error.message}`);
+        // window.alert(`${method} Request failed: ${error.message}`);
         return undefined;
     }
 }

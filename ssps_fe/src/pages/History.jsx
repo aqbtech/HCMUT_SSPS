@@ -7,19 +7,25 @@ const History = () => {
   const [history, setHistory] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  // useEffect(()=> {
-  //   const token = Cookies.get("TOKEN");
-  //   if(!token) window.location.href = "http://localhost:8081/sso/login";
-  // })
+
+  // useEffect để kiểm tra token (nếu cần thiết)
+  useEffect(() => {
+    const token = Cookies.get("TOKEN");
+    if (!token) window.location.href = "http://localhost:8081/sso/login";
+  }, []);
+
   // Fetch dữ liệu từ API
   useEffect(() => {
     const fetchHistory = async () => {
       const result = await sendGetRequest('GET', `/api/v1/log/log?page=${page}&size=10`);
+
       if (result) {
         setHistory(result.content);
         setTotalPages(result.page.totalPages);
       }
+      console.log(result);
     };
+
     fetchHistory();
   }, [page]);
 
@@ -80,13 +86,13 @@ const History = () => {
           {/* Phân trang */}
           <div className="flex justify-between items-center mt-4">
             <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 0}
-              className={`px-4 py-2 rounded ${
-                page === 0
-                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page === 0}
+                className={`px-4 py-2 rounded ${
+                    page === 0
+                        ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
             >
               Previous
             </button>
@@ -94,21 +100,22 @@ const History = () => {
               Trang {page + 1} / {totalPages}
             </span>
             <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page + 1 >= totalPages}
-              className={`px-4 py-2 rounded ${
-                page + 1 >= totalPages
-                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page + 1 >= totalPages}
+                className={`px-4 py-2 rounded ${
+                    page + 1 >= totalPages
+                        ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
             >
               Next
             </button>
           </div>
-        </div>
-      </main>
     </div>
-  );
+</main>
+</div>
+)
+  ;
 };
 
 export default History;
