@@ -9,7 +9,7 @@ public class PrintRequest {
 	private String printDeviceId;
 	private PaperSize paperSize;
 	private int numberOfCopies;
-	private String pageRange; // accepted format: all, even, old, custom(min-max: 1-3,5,7-9)
+	private String pageRange; // accepted format: all, even, odd, custom(min-max: 1-3,5,7-9)
 	private int min;
 	private int max;
 	private String pageType; // accepted format: single, double

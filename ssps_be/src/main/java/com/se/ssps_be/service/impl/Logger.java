@@ -46,9 +46,20 @@ public class Logger implements LogService {
 		Student student = studentRepo.findStudentByUsername(username)
 				.orElseThrow(() -> new IllegalArgumentException("Student not found"));
 		List<PrintJob> printJobs = student.getPrintJob();
-		Page<PrintJob> printJobsPage = new PageImpl<>(printJobs, PageRequest.of(page, size), printJobs.size());
+
+		// Xác định index bắt đầu và kết thúc của phần tử trong trang
+		int start = Math.min(page * size, printJobs.size());
+		int end = Math.min((page + 1) * size, printJobs.size());
+
+		// Cắt danh sách theo trang
+		List<PrintJob> pagedPrintJobs = printJobs.subList(start, end);
+
+		// Tạo Page từ danh sách đã cắt
+		Page<PrintJob> printJobsPage = new PageImpl<>(pagedPrintJobs, PageRequest.of(page, size), printJobs.size());
+
 		return printJob2Log.toLogLinePage(printJobsPage);
 	}
+
 
 	@Override
 	public Page<LogLine> getAllLogs(int page, int size) {
