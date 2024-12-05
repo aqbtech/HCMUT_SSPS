@@ -63,9 +63,9 @@ const Home = () => {
                 </section>
 
                 {/* About Us section */}
-                <section className="flex flex-col items-center bg-gray-100 w-full px-8 py-16" id="about-us">
+                <section className="flex flex-col items-center bg-gray-100 w-full px-6 py-16" id="about-us">
                     <h2 className="text-4xl font-bold text-gray-800">Về chúng tôi</h2>
-                    <p className="mt-4 text-lg text-gray-600 text-center max-w-prose">
+                    <p className="mt-4 text-lg text-gray-600 text-center">
                         BK là một trong những trường đại học hàng đầu về khoa học kỹ thuật tại Việt Nam.
                     </p>
                 </section>
