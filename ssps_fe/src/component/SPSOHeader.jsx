@@ -2,6 +2,7 @@ import LogoHCMUT from "./logoHCMUT.jsx"
 import { useNavigate } from "react-router-dom";
 import { useState,useRef,useEffect } from "react";
 import '@fortawesome/fontawesome-free/css/all.min.css';
+
 export default function StudentHeader() {
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -14,8 +15,9 @@ export default function StudentHeader() {
     ];
 
     function handleLogoClick() {
-        navigate("/spso/info");
+        navigate("/spso/home");
     }
+
     function handleLogoutClick() {
         console.log("Đăng xuất clicked");
         window.location.href = "http://localhost:8081/sso/login";
@@ -36,24 +38,12 @@ export default function StudentHeader() {
     }, [dropdownRef]);
 
     return (
-      <header className="flex flex-wrap items-center justify-between w-full bg-[#252836] p-6 shadow-lg overflow-hidden">
-      {/* Logo Section */}
-      <div className="cursor-pointer mb-4 md:mb-0" onClick={handleLogoClick}>
-        <LogoHCMUT />
-      </div>
+        <header className="flex items-center w-full bg-blue-600">
+            {/* Logo Section */}
+            <div className="cursor-pointer mr-24" onClick={handleLogoClick}>
+                <LogoHCMUT />
+            </div>
 
-      {/* Navigation Bar */}
-      <nav className="flex flex-wrap items-center space-y-4 md:space-y-0 md:space-x-4">
-        {items.map((item, index) => (
-          <a
-            key={index}
-            href={item.link}
-            className="flex items-center justify-center w-full md:w-[16.75rem] h-[4.3125rem] bg-[#EA7C69] text-white font-semibold rounded-full transition hover:bg-[#d96b5a]"
-          >
-            {item.text}
-          </a>
-        ))}
-      </nav>
             {/* Navigation Bar */}
             <nav className="flex items-center space-x-8">
                 {items.map((item, index) => (
