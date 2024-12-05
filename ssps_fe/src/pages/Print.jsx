@@ -69,7 +69,6 @@ const Print = () => {
   }, []);
 
 
-
   // Xử lý mở modal với tài liệu được chọn và lấy số trang của tài liệu
   const handlePrintClick = async (docId) => {
     setSelectedDocId(docId);
