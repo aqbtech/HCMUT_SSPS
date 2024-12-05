@@ -17,14 +17,14 @@ const MyDoc = () => {
   //   const token = Cookies.get("TOKEN");
   //   if(!token) window.location.href = "http://localhost:8081/sso/login";
   // })
-  const fetchDocs = async (page = 0, size = 10) => {
+  const fetchDocs = async () => {
     try {
-      const result = await sendGetRequest('/api/v1/document/all-documents', { page, size });
+      const result = await sendGetRequest(`/api/v1/document/all-documents?page=${page}&size=10`);
       console.log(result)
       if (result) {
         setDocs(result.content);
-        setPage(result.page.number);
-        setSize(result.page.size);
+        // setPage(result.page.number);
+        // setSize(result.page.size);
         setTotalPages(result.page.totalPages);
       } else {
         setDocs([]);
@@ -37,7 +37,7 @@ const MyDoc = () => {
 
   useEffect(() => {
     fetchDocs();
-  }, []);
+  }, [page]);
 
   const handleDelete = async (docId) => {
     const result = await sendRequest('DELETE', `/api/v1/document/delete?id=${docId}`, null);
@@ -74,9 +74,9 @@ const MyDoc = () => {
     }
   };
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      fetchDocs(newPage, size);
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber >= 0 && pageNumber < totalPages) {
+      setPage(pageNumber);
     }
   };
 

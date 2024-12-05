@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import StudentHeader from '../component/StudentHeader';
-import sendRequest, { sendGetRequest } from '../API/fetchAPI';
+import sendRequest, {sendGetRequest} from '../API/fetchAPI';
 import Cookies from "js-cookie";
 import file_icon from '../assets/file_icon.png';
 import ErrorForm from '../component/errorForm';
@@ -94,19 +94,17 @@ const Print = () => {
       toast.error("Vui lòng chọn máy in!")
       return;
     }
-    try{
-      const result = await sendRequest('POST', '/api/v1/print/create', payload, {
-        'Content-Type': 'application/json',
-      });
-      if(result == "NOT_ENOUGH_BALANCE"){
+    try {
+      const result = await sendRequest('POST', '/api/v1/print/create', payload);
+      if(result === "NOT_ENOUGH_BALANCE"){
         toast.error("Lượng giấy còn lại của bạn không đủ để thực hiện yêu cầu in!")
         return;
       }
-      else if(result == "NOT_ENOUGH_INK"){
+      else if(result === "NOT_ENOUGH_INK"){
         toast.error("Máy in không đủ mực!")
         return;
       }
-      else if(result == "NOT_ENOUGH_PAPER") {
+      else if(result === "NOT_ENOUGH_PAPER") {
         toast.error("Lượng giấy còn lại của máy in không đủ để thực hiện yêu cầu in!")
         return;
       }
@@ -114,8 +112,21 @@ const Print = () => {
       toast.success("In thành công!");
       setModalOpen(false);
     } catch (err){
+        if(err === "NOT_ENOUGH_BALANCE"){
+          toast.error("Lượng giấy còn lại của bạn không đủ để thực hiện yêu cầu in!")
+          return;
+        }
+        else if(err=== "NOT_ENOUGH_INK"){
+          toast.error("Máy in không đủ mực!")
+          return;
+        }
+        else if(err === "NOT_ENOUGH_PAPER") {
+          toast.error("Lượng giấy còn lại của máy in không đủ để thực hiện yêu cầu in!")
+          return;
+        }
         console.log("Loi khi in: ", err);
         toast.error("Loi khi in");
+        return;
     }
   };
 
@@ -242,11 +253,12 @@ const Print = () => {
                 <input
                     type="number"
                     min="1"
-                    // max="999"
+                    max="2147483647"
                     className="w-full border px-3 py-2 rounded"
                     value={printOptions.numberOfCopies}
                     onChange={(e) => {
-                        // if (e.target.value > 999) e.target.value = 999
+                      if (e.target.value < 1) e.target.value = 1
+                      if (e.target.value > 2147483647) e.target.value = 2147483647
                       setPrintOptions({...printOptions, numberOfCopies: e.target.value})
                     }
 

@@ -72,12 +72,12 @@ public class PrintImpl implements PrintService {
 		// log the print job to db
 		LogInfo logInfo = logService.createLogInfo(printJob);
 
-		if (student.getRemainingBalance() < balance) {
+		if (student.getRemainingBalance() < 0 || student.getRemainingBalance() < balance) {
 			// print job failed
 			printJob.setState(PrintState.NOT_ENOUGH_BALANCE);
+			state = PrintState.NOT_ENOUGH_BALANCE;
 //			throw new IllegalArgumentException("Not enough balance"); // TODOd: also log to db
 		}
-		printJob.setLogInfo(logInfo);
 		printJob.setLogInfo(logInfo);
 		printJobRepo.save(printJob);
 		logService.saveLogInfo(logInfo);

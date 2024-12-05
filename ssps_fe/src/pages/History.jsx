@@ -11,7 +11,10 @@ const History = () => {
   // useEffect để kiểm tra token (nếu cần thiết)
   useEffect(() => {
     const token = Cookies.get("TOKEN");
-    if (!token) window.location.href = "http://localhost:8081/sso/login";
+    if (!token) {
+      window.alert("Vui lòng đăng nhập để sử dụng dịch vụ!");
+      window.location.href = "http://localhost:8081/sso/login";
+    }
   }, []);
 
   // Fetch dữ liệu từ API
@@ -52,6 +55,7 @@ const History = () => {
                 <th className="border border-gray-300 px-4 py-2">Tên tài liệu</th>
                 <th className="border border-gray-300 px-4 py-2">Máy in</th>
                 <th className="border border-gray-300 px-4 py-2">Vị trí</th>
+                <th className="border border-gray-300 px-3 py-2">Khổ giấy</th>
                 <th className="border border-gray-300 px-3 py-2">Số bản in</th>
                 <th className="border border-gray-300 px-4 py-2">Trạng thái</th>
                 <th className="border border-gray-300 px-4 py-2">Tổng số trang(A4)</th>
@@ -68,6 +72,7 @@ const History = () => {
                     <td className="border border-gray-300 px-4 py-2">
                       {log.location.campus}, {log.location.building}, {log.location.room}
                     </td>
+                    <td className="border border-gray-300 px-4 py-2">{log.pageType}</td>
                     <td className="border border-gray-300 px-4 py-2">{log.numberOfCopy}</td>
                     <td className="border border-gray-300 px-4 py-2">{log.status}</td>
                     <td className="border border-gray-300 px-4 py-2">{log.cost}</td>
