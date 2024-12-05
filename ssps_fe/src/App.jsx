@@ -14,13 +14,14 @@ import SPSO_home from './pages/SPSO_home.jsx';
 import Printer_Manage from './pages/Printer_Manage.jsx';
 import SPSO_history from './pages/SPSO_history.jsx';
 import SPSO_report from './pages/SPSO_report.jsx';
+import Student_Info from './pages/Student_Info.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    
-      <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+
+      <div>
           <ToastContainer/>
           <Routes>
             <Route path='/' element={<Home/>}/>
@@ -31,6 +32,7 @@ function App() {
             <Route path='/student/home' element={<Student_home/>} />
             <Route path='/student/print' element={<Print/>} />
             <Route path='/student/printer' element={<Printer/>} />
+            <Route path='/student/info' element={<Student_Info/>} />
             <Route path='/student/myDoc' element={<MyDoc/>} />
             <Route path='/student/history' element={<History/>} />
             <Route path='/student/buy' element={<Buy/>} />

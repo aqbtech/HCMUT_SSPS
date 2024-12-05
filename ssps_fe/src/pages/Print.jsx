@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import StudentHeader from '../component/StudentHeader';
 import sendRequest, { sendGetRequest } from '../API/fetchAPI';
 import Cookies from "js-cookie";
+import file_icon from '../assets/file_icon.png';
+import ErrorForm from '../component/errorForm';
+import {toast} from "react-toastify";
 
 const Print = () => {
   const [docs, setDocs] = useState([]);
+  const [errorMess, setErrorMess] = useState(null);
   const [selectedDocId, setSelectedDocId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [printOptions, setPrintOptions] = useState({
@@ -46,11 +50,18 @@ const Print = () => {
   // Fetch danh sách thiết bị in khi component mount
   useEffect(() => {
     const fetchDevices = async () => {
-      const response = await sendGetRequest('/api/v1/print-device/all');
-      console.log("Thiet bi may in:", response)
-      if (response.result) {
-        setListDevices(response.result); // Giả sử response trả về là danh sách thiết bị
+      try {
+        const response = await sendGetRequest('/api/v1/print-device/all');
+        console.log("Thiet bi may in:", response)
+        if (response.result) {
+          setListDevices(response.result); // Giả sử response trả về là danh sách thiết bị
+        }
+      } catch (err){
+        toast.error("Lay thiet bi that bai");
+        throw err;
       }
+
+
     };
     fetchDevices();
   }, []);
@@ -71,21 +82,26 @@ const Print = () => {
 
   // Gửi yêu cầu in
   const handlePrintSubmit = async () => {
-    if (!selectedDocId) return alert('No document selected.');
+    if (!selectedDocId) return errorMessage('No document selected.');
     const payload = {
       docsId: selectedDocId,
       ...printOptions,
     };
     console.log("Payload:", payload);
-    const result = await sendRequest('POST', '/api/v1/print/create', payload, {
-      'Content-Type': 'application/json',
-    });
-    console.log("Ket qua in:", result);
-    if (result === 'PRINTED') {
-      alert('Document sent to printer successfully!');
+    if(!printOptions.printDeviceId){
+      toast.error("Vui long chon may in")
+      return;
+    }
+    try{
+      const result = await sendRequest('POST', '/api/v1/print/create', payload, {
+        'Content-Type': 'application/json',
+      });
+      console.log("Ket qua in:", result);
+      toast.success("In thanh cong");
       setModalOpen(false);
-    } else {
-      alert('Failed to print document, code:' + result);
+    } catch (err){
+        console.log("Loi khi in: ", err);
+        toast.error("Loi khi in");
     }
   };
 
@@ -108,6 +124,7 @@ const Print = () => {
             <thead className="bg-blue-600 text-white">
               <tr>
                 <th className="px-4 py-2 text-left">#</th>
+                <th className="px-4 py-2 text-left">#</th>
                 <th className="px-4 py-2 text-left">Name</th>
                 <th className="px-4 py-2 text-center">Actions</th>
               </tr>
@@ -115,6 +132,9 @@ const Print = () => {
             <tbody>
               {docs.map((doc, index) => (
                 <tr key={doc.id} className="odd:bg-gray-50 even:bg-white">
+                  <td className="px-4 py-2 flex items-center"> 
+                    <img src={file_icon} alt="File" className="w-5 h-5 mr-2" /> 
+                  </td>
                   <td className="px-4 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="px-4 py-2">{doc.name}</td>
                   <td className="px-4 py-2 text-center">
@@ -155,126 +175,115 @@ const Print = () => {
 
       {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <h2 className="text-xl font-bold mb-4">Print Options</h2>
-             {/* Chọn thiết bị in */}
-            <div className="mb-4">
-              <label className="block font-bold mb-2">Print Device ID</label>
-              <select
-                  className="w-full border px-3 py-2 rounded"
-                  value={printOptions.printDeviceId}
-                  onChange={(e) =>
-                      setPrintOptions({...printOptions, printDeviceId: e.target.value})
-                  }
-              >
-                <option value="">Select a device</option>
-                {listDevices.map((device) => (
-                    <option key={device.printerId} value={device.printerId}>
-                      {device.brand} {device.model} - {device.description}
-                    </option>
-                ))}
-              </select>
-            </div>
+          <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-full overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">Print Options</h2>
 
-            <div className="mb-4">
-              <label className="block font-bold mb-2">Paper Size</label>
-              <select
-                  className="w-full border px-3 py-2 rounded"
-                  value={printOptions.paperSize}
-                  onChange={(e) =>
-                      setPrintOptions({...printOptions, paperSize: e.target.value})
-                  }
-              >
-                <option value="A4">A4</option>
-                <option value="A3">A3</option>
-                <option value="Letter">Letter</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block font-bold mb-2">Number of Copies</label>
-              <input
-                type="number"
-                min="1"
-                className="w-full border px-3 py-2 rounded"
-                value={printOptions.numberOfCopies}
-                onChange={(e) =>
-                  setPrintOptions({ ...printOptions, numberOfCopies: e.target.value })
-                }
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block font-bold mb-2">Page Range</label>
-              <select
-                className="w-full border px-3 py-2 rounded mb-2"
-                value={printOptions.pageRangeType || 'all'}
-                onChange={(e) =>
-                  setPrintOptions({ ...printOptions, pageRangeType: e.target.value})
-                }
-              >
-                <option value="all">Full</option>
-                <option value="odd">Odd</option>
-                <option value="even">Even</option>
-                <option value="custom">Custom</option>
-              </select>
+              {/* Chọn thiết bị in */}
+              <div className="mb-4">
+                <label className="block font-bold mb-2">Print Device ID</label>
+                <select
+                    className="w-full border px-3 py-2 rounded"
+                    value={printOptions.printDeviceId}
+                    onChange={(e) =>
+                        setPrintOptions({...printOptions, printDeviceId: e.target.value})
+                    }
+                >
+                  <option value="">Select a device</option>
+                  {listDevices
+                      .filter((device) => device.description === "enabled") // Chỉ hiển thị thiết bị enabled
+                      .map((device) => (
+                          <option key={device.printerId} value={device.printerId}>
+                            {device.brand} {device.model} ({device.location})
+                          </option>
+                      ))}
+                </select>
+              </div>
 
-              {printOptions.pageRangeType === 'custom' && (
+              {/* Kích thước giấy */}
+              <div className="mb-4">
+                <label className="block font-bold mb-2">Paper Size</label>
+                <select
+                    className="w-full border px-3 py-2 rounded"
+                    value={printOptions.paperSize}
+                    onChange={(e) =>
+                        setPrintOptions({...printOptions, paperSize: e.target.value})
+                    }
+                >
+                  <option value="">Select paper size</option>
+                  {listDevices
+                      .find((device) => device.printerId === printOptions.printDeviceId)?.supportedPaperSize.map(
+                          (size) => (
+                              <option key={size} value={size}>
+                                {size}
+                              </option>
+                          )
+                      )}
+                </select>
+              </div>
+
+              {/* Số lượng bản in */}
+              <div className="mb-4">
+                <label className="block font-bold mb-2">Number of Copies</label>
                 <input
-                  type="text"
-                  placeholder={`e.g., 1-${docTotalPages}`}
-                  className="w-full border px-3 py-2 rounded"
-                  value={printOptions.pageRange}
-                  onChange={(e) =>
-                    setPrintOptions({ ...printOptions, pageRange: e.target.value })
-                  }
+                    type="number"
+                    min="1"
+                    max = "999"
+                    className="w-full border px-3 py-2 rounded"
+                    value={printOptions.numberOfCopies}
+                    onChange={(e) =>{ if (e.target.value > 999) e.target.value = 999
+                      setPrintOptions({...printOptions, numberOfCopies: e.target.value})}
+
+                    }
                 />
-              )}
-            </div>
+              </div>
 
-            <div className="mb-4">
-              <label className="block font-bold mb-2">Page Type</label>
-              <select
-                className="w-full border px-3 py-2 rounded"
-                value={printOptions.pageType}
-                onChange={(e) =>
-                  setPrintOptions({ ...printOptions, pageType: e.target.value })
-                }
-              >
-                <option value="single">Single</option>
-                <option value="double">Double</option>
-              </select>
-            </div>
+              {/* Các tùy chọn in khác */}
+              <div className="mb-4">
+                <label className="block font-bold mb-2">Page Type</label>
+                <select
+                    className="w-full border px-3 py-2 rounded"
+                    value={printOptions.pageType}
+                    onChange={(e) =>
+                        setPrintOptions({...printOptions, pageType: e.target.value})
+                    }
+                >
+                  <option value="single">Single</option>
+                  <option value="double">Double</option>
+                </select>
+              </div>
 
-            <div className="mb-4">
-              <label className="block font-bold mb-2">Layout</label>
-              <select
-                className="w-full border px-3 py-2 rounded"
-                value={printOptions.layout}
-                onChange={(e) =>
-                  setPrintOptions({ ...printOptions, layout: e.target.value })
-                }
-              >
-                <option value="portrait">Portrait</option>
-                <option value="landscape">Landscape</option>
-              </select>
-            </div>
+              <div className="mb-4">
+                <label className="block font-bold mb-2">Layout</label>
+                <select
+                    className="w-full border px-3 py-2 rounded"
+                    value={printOptions.layout}
+                    onChange={(e) =>
+                        setPrintOptions({...printOptions, layout: e.target.value})
+                    }
+                >
+                  <option value="portrait">Portrait</option>
+                  <option value="landscape">Landscape</option>
+                </select>
+              </div>
 
-            <div className="flex justify-end">
-              <button
-                onClick={handlePrintSubmit}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                Print
-              </button>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="ml-2 bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
+              {/* Nút hành động */}
+              <div className="flex justify-end">
+                <button
+                    onClick={handlePrintSubmit}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Print
+                </button>
+                <button
+                    onClick={() => setModalOpen(false)}
+                    className="ml-2 bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
       )}
     </div>
   );

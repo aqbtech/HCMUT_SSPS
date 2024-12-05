@@ -20,7 +20,7 @@ const SPSOHistory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await sendGetRequest('GET', `/api/v1/spso/printerjob/printer/${printerId}`);
+    const response = await sendGetRequest(`/api/v1/spso/printerjob/printer/${printerId}`);
     if (response && response.code === 200) {
       setHistory(response.result);
     }
@@ -32,74 +32,108 @@ const SPSOHistory = () => {
 
   const handleDateSubmit = async (e) => {
     e.preventDefault();
-    const response = await sendGetRequest('GET', `/api/v1/spso/printerjob/date/${date}`);
+    const response = await sendGetRequest(`/api/v1/spso/printerjob/date/${date}`);
     if (response && response.code === 200) {
       setHistory(response.result);
     }
   };
 
-  return (
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const response = await sendGetRequest(`/api/v1/spso/printerjob`); // Fetch all history initially
+      if (response && response.code === 200) {
+        setHistory(response.result);
+      }
+    };
+    fetchHistory();
+  }, []);
+
+    return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
       <SPSOHeader />
       <div className="container mx-auto py-10 px-4 flex-1">
-        <h1 className="text-2xl font-bold text-center mb-6">Printer History</h1>
-        <form onSubmit={handleSubmit} className="mb-6">
-          <div className="flex justify-center items-center space-x-4">
-            <input
-              type="text"
-              id="printerId"
-              name="printerId"
-              value={printerId}
-              onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Enter Printer ID"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Show History
-            </button>
-          </div>
-        </form>
-        <form onSubmit={handleDateSubmit} className="mb-6">
-          <div className="flex justify-center items-center space-x-4">
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={date}
-              onChange={handleDateChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Show History by Date
-            </button>
-          </div>
-        </form>
-        <div className="bg-white p-6 rounded shadow-md">
-          <h2 className="text-xl font-bold mb-4">Printing History</h2>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Printer History</h1>
+
+        {/* Search Forms */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <form onSubmit={handleSubmit} className="bg-white p-4 rounded-md shadow-md">
+            <div className="flex flex-col md:flex-row md:items-center">
+              <label htmlFor="printerId" className="mr-2 mb-2 md:mb-0">Printer ID:</label>
+              <input
+                type="text"
+                id="printerId"
+                name="printerId"
+                value={printerId}
+                onChange={handleInputChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline   
+ flex-grow"
+                placeholder="Enter Printer ID"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2 md:mt-0 ml-0 md:ml-2"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+
+          <form onSubmit={handleDateSubmit} className="bg-white p-4 rounded-md shadow-md">
+            <div className="flex flex-col md:flex-row md:items-center">
+              <label htmlFor="date" className="mr-2 mb-2 md:mb-0">Date:</label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                value={date}
+                onChange={handleDateChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline   
+ flex-grow"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2 md:mt-0 ml-0 md:ml-2"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* History List */}
+        <div className="bg-white p-6 rounded-md shadow-md overflow-x-auto"> {/* Added overflow-x-auto */}
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Printing History</h2>
           {history.length > 0 ? (
-            <ul>
-              {history.map((item, index) => (
-                <li key={index} className="mb-4">
-                  <p><strong>Student:</strong> {item.studentResponse.username}</p>
-                  <p><strong>Printer:</strong> {item.printerResponse.brand} {item.printerResponse.model}</p>
-                  <p><strong>File Name:</strong> {item.fileName}</p>
-                  <p><strong>Total Pages:</strong> {item.totalPages}</p>
-                  <p><strong>Paper Size:</strong> {item.paperSize}</p>
-                  <p><strong>Start Time:</strong> {new Date(item.startTime).toLocaleString()}</p>
-                  <p><strong>End Time:</strong> {new Date(item.endTime).toLocaleString()}</p>
-                </li>
-              ))}
-            </ul>
+            <table className="min-w-full"> {/* Use a table for better data organization */}
+              <thead>
+                <tr>
+                  <th className="py-2 px-4 border-b text-left">Student</th>
+                  <th className="py-2 px-4 border-b text-left">Printer</th>
+                  <th className="py-2 px-4 border-b text-left">File Name</th>
+                  <th className="py-2 px-4 border-b text-left">Total Pages</th>
+                  <th className="py-2 px-4 border-b text-left">Paper Size</th>
+                  <th className="py-2 px-4 border-b text-left">Start Time</th>
+                  <th className="py-2 px-4 border-b text-left">End Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((item, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-100">
+                    <td className="py-2 px-4">{item.studentResponse.username}</td>
+                    <td className="py-2 px-4">{item.printerResponse.brand} {item.printerResponse.model}</td>
+                    <td className="py-2 px-4">{item.fileName}</td>
+                    <td className="py-2 px-4">{item.totalPages}</td>
+                    <td className="py-2 px-4">{item.paperSize}</td>
+                    <td className="py-2 px-4">{new Date(item.startTime).toLocaleString()}</td>
+                    <td className="py-2 px-4">{new Date(item.endTime).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
-            <p>No history available.</p>
+            <p className="text-gray-600">No history available.</p>
           )}
         </div>
       </div>
