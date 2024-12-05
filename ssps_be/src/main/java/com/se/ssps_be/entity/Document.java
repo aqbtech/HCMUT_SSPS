@@ -27,7 +27,7 @@ public abstract class Document {
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private Boolean deleted = Boolean.FALSE;
 	@Lob
-	@Column(name = "data", nullable = false, columnDefinition = "MEDIUMBLOB")
+	@Column(name = "data", nullable = false, columnDefinition = "LONGBLOB")
 	@Basic(fetch = FetchType.LAZY)
 	private byte[] content;
 

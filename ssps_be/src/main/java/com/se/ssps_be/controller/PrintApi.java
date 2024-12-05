@@ -27,8 +27,11 @@ public class PrintApi {
 		String username = JwtUtils.extractSubject(jwtToken);
 
 		var state = printService.printDocument(username, printRequest);
-
-		return ResponseEntity.ok(state);
+		if (state.getCode() == 2) {
+			return ResponseEntity.ok(state);
+		} else {
+			return ResponseEntity.badRequest().body(state.toString());
+		}
 	}
 
 }
