@@ -22,7 +22,7 @@ const Home = () => {
                         setUserDetails(data);
 
                         if (data.role === "ADMIN") {
-                            navigate("/admin", { replace: true });
+                            navigate("/spso/home", { replace: true });
                         } else if (data.role === "USER") {
                             navigate("/student/home", { replace: true });
                         }
@@ -99,7 +99,7 @@ const Home = () => {
                             Liên hệ với chúng tôi để biết thêm thông tin chi tiết.
                         </p>
                     </div>
-                    <div className="w-64 h-64 bg-gray-300 rounded-lg flex items-center justify-center">
+                    <div className="w-32 h-32 bg-gray-300 rounded-lg flex items-center justify-center">
                         <span className="text-4xl text-gray-700">📞</span>
                     </div>
                 </section>

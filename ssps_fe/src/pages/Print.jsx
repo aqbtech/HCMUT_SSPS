@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import StudentHeader from '../component/StudentHeader';
 import sendRequest, { sendGetRequest } from '../API/fetchAPI';
 import Cookies from "js-cookie";
+import file_icon from '../assets/file_icon.png';
+import ErrorForm from '../component/errorForm';
 
 const Print = () => {
   const [docs, setDocs] = useState([]);
+  const [errorMess, setErrorMess] = useState(null);
   const [selectedDocId, setSelectedDocId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [printOptions, setPrintOptions] = useState({
@@ -50,6 +53,7 @@ const Print = () => {
       console.log("Thiet bi may in:", response)
       if (response.result) {
         setListDevices(response.result); // Giả sử response trả về là danh sách thiết bị
+        console.log("List devices:", listDevices);
       }
     };
     fetchDevices();
@@ -71,7 +75,7 @@ const Print = () => {
 
   // Gửi yêu cầu in
   const handlePrintSubmit = async () => {
-    if (!selectedDocId) return alert('No document selected.');
+    if (!selectedDocId) return errorMessage('No document selected.');
     const payload = {
       docsId: selectedDocId,
       ...printOptions,
@@ -82,10 +86,10 @@ const Print = () => {
     });
     console.log("Ket qua in:", result);
     if (result === 'PRINTED') {
-      alert('Document sent to printer successfully!');
+      errorMessage('Document sent to printer successfully!');
       setModalOpen(false);
     } else {
-      alert('Failed to print document, code:' + result);
+      errorMessage('Failed to print document, code:' + result);
     }
   };
 
@@ -108,6 +112,7 @@ const Print = () => {
             <thead className="bg-blue-600 text-white">
               <tr>
                 <th className="px-4 py-2 text-left">#</th>
+                <th className="px-4 py-2 text-left">#</th>
                 <th className="px-4 py-2 text-left">Name</th>
                 <th className="px-4 py-2 text-center">Actions</th>
               </tr>
@@ -115,6 +120,9 @@ const Print = () => {
             <tbody>
               {docs.map((doc, index) => (
                 <tr key={doc.id} className="odd:bg-gray-50 even:bg-white">
+                  <td className="px-4 py-2 flex items-center"> 
+                    <img src={file_icon} alt="File" className="w-5 h-5 mr-2" /> 
+                  </td>
                   <td className="px-4 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="px-4 py-2">{doc.name}</td>
                   <td className="px-4 py-2 text-center">
@@ -156,6 +164,7 @@ const Print = () => {
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white rounded-lg p-6 w-96 max-h-full overflow-y-auto">
           <div className="bg-white rounded-lg p-6 w-96">
             <h2 className="text-xl font-bold mb-4">Print Options</h2>
              {/* Chọn thiết bị in */}
@@ -169,9 +178,11 @@ const Print = () => {
                   }
               >
                 <option value="">Select a device</option>
-                {listDevices.map((device) => (
+                {listDevices
+                // .filter(device => device.description !== 'disabled')
+                .map((device) => (
                     <option key={device.printerId} value={device.printerId}>
-                      {device.brand} {device.model} - {device.description}
+                      {device.brand} {device.model}
                     </option>
                 ))}
               </select>
@@ -186,9 +197,13 @@ const Print = () => {
                       setPrintOptions({...printOptions, paperSize: e.target.value})
                   }
               >
-                <option value="A4">A4</option>
-                <option value="A3">A3</option>
-                <option value="Letter">Letter</option>
+                {listDevices
+                // .filter(device => device.description !== 'disabled')
+                .map((device) => (
+                    <option key={device.printerId} value={device.printerId}>
+                      {device.supportedPaperSize}
+                    </option>
+                ))}
               </select>
             </div>
             <div className="mb-4">
@@ -273,6 +288,7 @@ const Print = () => {
                 Cancel
               </button>
             </div>
+          </div>
           </div>
         </div>
       )}
