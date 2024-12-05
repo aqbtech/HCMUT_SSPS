@@ -16,6 +16,8 @@ const Print = () => {
     paperSize: 'A4',
     numberOfCopies: 1,
     pageRange: 'all',
+    min: null,
+    max: null,
     pageType: 'single',
     layout: 'portrait',
   });
@@ -38,7 +40,7 @@ const Print = () => {
       const result = await sendRequest('GET', `/api/v1/document/all-documents?page=${currentPage - 1}&size=${itemsPerPage}`);
       if (result) {
         setDocs(result.content || []);
-        setTotalPages(result.totalPages); // Cập nhật tổng số trang từ API
+        setTotalPages(result.page.totalPages); // Cập nhật tổng số trang từ API
       } else {
         setDocs([]);
       }
@@ -66,20 +68,17 @@ const Print = () => {
     fetchDevices();
   }, []);
 
-  
 
   // Xử lý mở modal với tài liệu được chọn và lấy số trang của tài liệu
   const handlePrintClick = async (docId) => {
     setSelectedDocId(docId);
-    setModalOpen(true);
 
     // Lấy số trang của tài liệu từ API
     const path = `/api/v1/document/page-count?docid=${docId}`;
-    const docResult = await sendRequest('GET',`api/v1/document/page-count?docid=${docId}`);
+    const docResult = await sendRequest('GET',`/api/v1/document/page-count?docid=${docId}`);
     console.log("So trang tai lieu la:", docResult);
-    if (docResult && docResult.result) {
-      setDocTotalPages(docResult.result);
-    }
+    setModalOpen(true);
+    setDocTotalPages(docResult);
   };
 
   // Gửi yêu cầu in
@@ -91,15 +90,27 @@ const Print = () => {
     };
     console.log("Payload:", payload);
     if(!printOptions.printDeviceId){
-      toast.error("Vui long chon may in")
+      toast.error("Vui lòng chọn máy in!")
       return;
     }
     try{
       const result = await sendRequest('POST', '/api/v1/print/create', payload, {
         'Content-Type': 'application/json',
       });
+      if(result == "NOT_ENOUGH_BALANCE"){
+        toast.error("Lượng giấy còn lại của bạn không đủ để thực hiện yêu cầu in!")
+        return;
+      }
+      else if(result == "NOT_ENOUGH_INK"){
+        toast.error("Máy in không đủ mực!")
+        return;
+      }
+      else if(result == "NOT_ENOUGH_PAPER") {
+        toast.error("Lượng giấy còn lại của máy in không đủ để thực hiện yêu cầu in!")
+        return;
+      }
       console.log("Ket qua in:", result);
-      toast.success("In thanh cong");
+      toast.success("In thành công!");
       setModalOpen(false);
     } catch (err){
         console.log("Loi khi in: ", err);
@@ -118,17 +129,17 @@ const Print = () => {
     <div className="bg-gray-100 min-h-screen flex flex-col">
       <StudentHeader />
       <div className="container mx-auto py-10 px-4 flex-1">
-        <h1 className="text-2xl font-bold text-center mb-6">Print Documents</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">In tài liệu</h1>
 
         {/* Document List */}
         <div className="bg-white rounded shadow overflow-hidden">
           <table className="table-auto w-full">
             <thead className="bg-blue-600 text-white">
               <tr>
-                <th className="px-4 py-2 text-left">#</th>
-                <th className="px-4 py-2 text-left">#</th>
-                <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-center">Actions</th>
+                <th className="px-4 py-2 text-left"></th>
+                <th className="px-4 py-2 text-left">STT</th>
+                <th className="px-4 py-2 text-left">Tên tài liệu</th>
+                <th className="px-4 py-2 text-center"></th>
               </tr>
             </thead>
             <tbody>
@@ -144,7 +155,7 @@ const Print = () => {
                       onClick={() => handlePrintClick(doc.id)}
                       className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
                     >
-                      Print
+                      In
                     </button>
                   </td>
                 </tr>
@@ -160,17 +171,17 @@ const Print = () => {
             disabled={currentPage === 1}
             className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 disabled:bg-gray-300"
           >
-            Previous
+            Trang trước
           </button>
           <span>
-            Page {currentPage} of {totalPages}
+            Trang {currentPage} / {totalPages}
           </span>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 disabled:bg-gray-300"
           >
-            Next
+            Trang sau
           </button>
         </div>
       </div>
@@ -179,11 +190,11 @@ const Print = () => {
       {modalOpen && (
           <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-full overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4">Print Options</h2>
+              <h2 className="text-xl font-bold mb-4">Tùy chọn in</h2>
 
               {/* Chọn thiết bị in */}
               <div className="mb-4">
-                <label className="block font-bold mb-2">Print Device ID</label>
+                <label className="block font-bold mb-2">Máy in</label>
                 <select
                     className="w-full border px-3 py-2 rounded"
                     value={printOptions.printDeviceId}
@@ -191,7 +202,7 @@ const Print = () => {
                         setPrintOptions({...printOptions, printDeviceId: e.target.value})
                     }
                 >
-                  <option value="">Select a device</option>
+                  <option value="">Chọn máy in</option>
                   {listDevices
                       .filter((device) => device.description === "enabled") // Chỉ hiển thị thiết bị enabled
                       .map((device) => (
@@ -204,7 +215,7 @@ const Print = () => {
 
               {/* Kích thước giấy */}
               <div className="mb-4">
-                <label className="block font-bold mb-2">Paper Size</label>
+                <label className="block font-bold mb-2">Khổ giấy</label>
                 <select
                     className="w-full border px-3 py-2 rounded"
                     value={printOptions.paperSize}
@@ -212,7 +223,7 @@ const Print = () => {
                         setPrintOptions({...printOptions, paperSize: e.target.value})
                     }
                 >
-                  <option value="">Select paper size</option>
+                  <option value="" disabled>Chọn khổ giấy</option>
                   {listDevices
                       .find((device) => device.printerId === printOptions.printDeviceId)?.supportedPaperSize.map(
                           (size) => (
@@ -226,23 +237,95 @@ const Print = () => {
 
               {/* Số lượng bản in */}
               <div className="mb-4">
-                <label className="block font-bold mb-2">Number of Copies</label>
+                <label className="block font-bold mb-2">Số bản in</label>
                 <input
                     type="number"
                     min="1"
-                    max = "999"
+                    // max="999"
                     className="w-full border px-3 py-2 rounded"
                     value={printOptions.numberOfCopies}
-                    onChange={(e) =>{ if (e.target.value > 999) e.target.value = 999
-                      setPrintOptions({...printOptions, numberOfCopies: e.target.value})}
+                    onChange={(e) => {
+                        // if (e.target.value > 999) e.target.value = 999
+                      setPrintOptions({...printOptions, numberOfCopies: e.target.value})
+                    }
 
                     }
                 />
               </div>
 
+              {/* Chọn page range */}
+              <div className="mb-4">
+                <label className="block font-bold mb-2">Trang in</label>
+                <select
+                    className="w-full border px-3 py-2 rounded"
+                    value={printOptions.pageRange}
+                    onChange={(e) => setPrintOptions({ ...printOptions, pageRange: e.target.value })}
+                >
+                  <option value="all">all</option>
+                  <option value="even">even</option>
+                  <option value="odd">odd</option>
+                  <option value="custom">custom</option>
+                </select>
+              </div>
+
+              {/* Custom page range input */}
+              {printOptions.pageRange === 'custom' && (
+                  <div className="mb-4">
+                    <label className="block font-bold mb-2">Trang in(custom)</label>
+                    <div className="flex space-x-2">
+                      {/* Start Page */}
+                      <input
+                          type="number"
+                          className="w-full border px-3 py-2 rounded"
+                          placeholder="Start Page"
+                          value={printOptions.min || ''}
+                          min="1"
+                          onChange={(e) => {
+                            let value = parseInt(e.target.value, 10);
+
+                            // Đảm bảo giá trị không nhỏ hơn 1 và không lớn hơn số trang tối đa
+                            if (value < 1) value = 1;
+                            if (value > docTotalPages) value = docTotalPages;
+
+                            // Kiểm tra nếu lớn hơn End Page, đặt lại giá trị End Page
+                            if (printOptions.max && value > printOptions.max) {
+                              setPrintOptions({ ...printOptions, min: value, max: value });
+                            } else {
+                              setPrintOptions({ ...printOptions, min: value });
+                            }
+                          }}
+                      />
+
+                      {/* End Page */}
+                      <input
+                          type="number"
+                          className="w-full border px-3 py-2 rounded"
+                          placeholder="End Page"
+                          value={printOptions.max || ''}
+                          min="1"
+                          onChange={(e) => {
+                            let value = parseInt(e.target.value, 10);
+
+                            // Đảm bảo giá trị không nhỏ hơn 1 và không lớn hơn số trang tối đa
+                            if (value < 1) value = 1;
+                            if (value > docTotalPages) value = docTotalPages;
+
+                            // Kiểm tra nếu nhỏ hơn Start Page, đặt lại giá trị Start Page
+                            if (printOptions.min && value < printOptions.min) {
+                              setPrintOptions({ ...printOptions, min: value, max: value });
+                            } else {
+                              setPrintOptions({ ...printOptions, max: value });
+                            }
+                          }}
+                      />
+                    </div>
+                  </div>
+              )}
+
+
               {/* Các tùy chọn in khác */}
               <div className="mb-4">
-                <label className="block font-bold mb-2">Page Type</label>
+                <label className="block font-bold mb-2">Loại trang</label>
                 <select
                     className="w-full border px-3 py-2 rounded"
                     value={printOptions.pageType}
@@ -256,7 +339,7 @@ const Print = () => {
               </div>
 
               <div className="mb-4">
-                <label className="block font-bold mb-2">Layout</label>
+                <label className="block font-bold mb-2">Bố cục</label>
                 <select
                     className="w-full border px-3 py-2 rounded"
                     value={printOptions.layout}
@@ -275,13 +358,13 @@ const Print = () => {
                     onClick={handlePrintSubmit}
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 >
-                  Print
+                  Xác nhận
                 </button>
                 <button
                     onClick={() => setModalOpen(false)}
                     className="ml-2 bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
                 >
-                  Cancel
+                  Hủy
                 </button>
               </div>
             </div>

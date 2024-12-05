@@ -18,15 +18,21 @@ const MyDoc = () => {
   //   if(!token) window.location.href = "http://localhost:8081/sso/login";
   // })
   const fetchDocs = async (page = 0, size = 10) => {
-    const result = await sendGetRequest('/api/v1/document/all-documents', { page, size });
-    if (result) {
-      setDocs(result.content);
-      setPage(result.page.number);
-      setSize(result.page.size);
-      setTotalPages(result.page.totalPages);
-    } else {
-      setDocs([]);
+    try {
+      const result = await sendGetRequest('/api/v1/document/all-documents', { page, size });
+      console.log(result)
+      if (result) {
+        setDocs(result.content);
+        setPage(result.page.number);
+        setSize(result.page.size);
+        setTotalPages(result.page.totalPages);
+      } else {
+        setDocs([]);
+      }
+    } catch (err) {
+      console.log(err);
     }
+
   };
 
   useEffect(() => {
@@ -41,7 +47,7 @@ const MyDoc = () => {
   };
 
   const handleUpload = async () => {
-    if (!file) return toast.error('Please select a file to upload.');
+    if (!file) return toast.error('Vui lòng chọn tệp để tải lên');
 
     const formData = new FormData();
     formData.append('file', file);
@@ -54,13 +60,16 @@ const MyDoc = () => {
       },
       body: formData, // Gửi trực tiếp formData
     });
+    console.log(response);
 
     if (response.ok) {
       // alert('Upload thành công!');
       setFile(null); // Reset file sau khi upload
       fetchDocs(page, size); // Gọi lại danh sách tài liệu với trang hiện tại
+      toast.success("Tải tài liệu lên thành công")
     } else {
-      console.error('Upload thất bại!', await response.text());
+      toast.error("Tải tài liệu lên thất bại")
+      console.error('Tải tài liệu lên thất bại', await response.text());
       // alert('Upload thất bại!');
     }
   };
@@ -81,7 +90,7 @@ const MyDoc = () => {
       <div className="flex flex-col min-h-screen">
         <StudentHeader />
             <div className="container mx-auto flex-grow py-10 px-4">
-              <h1 className="text-2xl font-bold text-center mb-6">My Documents</h1>
+              <h1 className="text-2xl font-bold text-center mb-6">Tài liệu của bạn</h1>
 
               {/* File Upload Section */}
               <div className="mb-8 flex items-center justify-center gap-4">
@@ -100,7 +109,7 @@ const MyDoc = () => {
                 <p className="text-gray-600">{file.name}</p>
               </div>
             ) : (
-              <p className="text-gray-600">Drag 'n' drop a file here, or click to select a file</p>
+              <p className="text-gray-600">Tải tài liệu ở đây</p>
             )}
             </div>
             <input
@@ -112,7 +121,7 @@ const MyDoc = () => {
                 onClick={handleUpload}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
-              Upload Document
+              Xác nhận
             </button>
           </div>
 
@@ -121,9 +130,9 @@ const MyDoc = () => {
             <table className="table-auto w-full">
               <thead className="bg-blue-600 text-white">
               <tr>
-                <th className="px-4 py-2 text-left">#</th>
-                <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-center">Actions</th>
+                <th className="px-4 py-2 text-left">STT</th>
+                <th className="px-4 py-2 text-left">Tên tài liệu</th>
+                <th className="px-4 py-2 text-center"></th>
               </tr>
               </thead>
               <tbody>
@@ -136,7 +145,7 @@ const MyDoc = () => {
                           onClick={() => handleDelete(doc.id)}
                           className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                       >
-                        Delete
+                        Xóa
                       </button>
                     </td>
                   </tr>
@@ -144,7 +153,7 @@ const MyDoc = () => {
               {docs.length === 0 && (
                   <tr>
                     <td colSpan="3" className="text-center py-4">
-                      No documents found.
+                      Hiện chưa có tài liệu nào!
                     </td>
                   </tr>
               )}
@@ -163,10 +172,10 @@ const MyDoc = () => {
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
             >
-              Previous
+              Trang trước
             </button>
             <span>
-            Page {page + 1} of {totalPages}
+            Trang {page + 1} / {totalPages}
           </span>
             <button
                 onClick={() => handlePageChange(page + 1)}
@@ -177,7 +186,7 @@ const MyDoc = () => {
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
             >
-              Next
+              Trang sau
             </button>
           </div>
         </div>
