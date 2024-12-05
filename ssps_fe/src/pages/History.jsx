@@ -47,14 +47,14 @@ const History = () => {
           <table className="w-full table-auto border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-300 px-4 py-2">#</th>
-                <th className="border border-gray-300 px-4 py-2">Thời Gian</th>
-                <th className="border border-gray-300 px-4 py-2">Tên File</th>
-                <th className="border border-gray-300 px-4 py-2">Máy In</th>
-                <th className="border border-gray-300 px-4 py-2">Vị Trí</th>
-                <th className="border border-gray-300 px-4 py-2">Số Bản</th>
-                <th className="border border-gray-300 px-4 py-2">Trạng Thái</th>
-                <th className="border border-gray-300 px-4 py-2">Chi Phí</th>
+                <th className="border border-gray-300 px-4 py-2">STT</th>
+                <th className="border border-gray-300 px-4 py-2">Thời gian</th>
+                <th className="border border-gray-300 px-4 py-2">Tên tài liệu</th>
+                <th className="border border-gray-300 px-4 py-2">Máy in</th>
+                <th className="border border-gray-300 px-4 py-2">Vị trí</th>
+                <th className="border border-gray-300 px-3 py-2">Số bản in</th>
+                <th className="border border-gray-300 px-4 py-2">Trạng thái</th>
+                <th className="border border-gray-300 px-4 py-2">Tổng số trang(A4)</th>
               </tr>
             </thead>
             <tbody>
@@ -70,7 +70,7 @@ const History = () => {
                     </td>
                     <td className="border border-gray-300 px-4 py-2">{log.numberOfCopy}</td>
                     <td className="border border-gray-300 px-4 py-2">{log.status}</td>
-                    <td className="border border-gray-300 px-4 py-2">{log.cost} VND</td>
+                    <td className="border border-gray-300 px-4 py-2">{log.cost}</td>
                   </tr>
                 ))
               ) : (

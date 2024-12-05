@@ -47,14 +47,14 @@ export default function StudentHeader() {
         <header className="flex items-center w-full bg-blue-600">
             {/* Logo Section */}
             <div className="cursor-pointer mr-24" onClick={handleLogoClick}>
-                <LogoHCMUT />
+                <LogoHCMUT/>
             </div>
 
             {/* Navigation Bar */}
             <nav className="flex items-center space-x-1">
                 {items.map((item, index) => (
                     <div key={index}
-                         className="border border-gray-300 hover:border-black fill-blue-500 hover:fill-blue-50 rounded-lg p-2">
+                         className="hover:border-black rounded-lg p-2">
                         <a
                             href={item.link}
                             className="text-gray-800 hover:text-blue-500 hover:underline transition px-4 py-2 font-semibold shadow-sm"
@@ -63,42 +63,37 @@ export default function StudentHeader() {
                         </a>
                     </div>
                 ))}
-
-
-                <div className="flex items-center gap-6">
-                    {/* Icon người dùng */}
-                    <div className="group relative">
-                        <button
-                            onClick={() => setDropdownOpen(!dropdownOpen)}
-                            className="flex items-center space-x-2 bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition-all duration-300 ease-in-out"
-                        >
-                            <i className="fas fa-caret-down"></i> {/* Font Awesome Dropdown Icon */}
-                            <span className="text-sm font-medium"></span> {/* Thêm văn bản nếu muốn */}
-                        </button>
-
-                        {dropdownOpen && (
-                            <div
-                                className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg z-20">
-                                <button
-                                    onClick={handleStudentInfoClick}
-                                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md transition duration-200"
-                                >
-                                    Hồ sơ
-                                </button>
-                                <button
-                                    onClick={handleLogoutClick}
-                                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md transition duration-200"
-                                >
-                                    Thoát
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-
             </nav>
 
+            <div className="ml-auto flex items-center gap-6 pr-8"> {/* Thêm ml-auto vào đây */}
+                <div className="group relative">
+                    <button
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        className="flex items-center space-x-2 bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition-all duration-300 ease-in-out"
+                    >
+                        <i className="fas fa-caret-down"></i>
+                        <span className="text-sm font-medium"></span> {/* Thêm văn bản nếu muốn */}
+                    </button>
+
+                    {dropdownOpen && (
+                        <div
+                            className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg z-20">
+                            <button
+                                onClick={handleStudentInfoClick}
+                                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md transition duration-200"
+                            >
+                                Hồ sơ
+                            </button>
+                            <button
+                                onClick={handleLogoutClick}
+                                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md transition duration-200"
+                            >
+                                Thoát
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
 
         </header>
     );
