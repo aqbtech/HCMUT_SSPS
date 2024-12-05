@@ -22,7 +22,7 @@ const Home = () => {
                         setUserDetails(data);
 
                         if (data.role === "ADMIN") {
-                            navigate("/admin", { replace: true });
+                            navigate("/spso/home", { replace: true });
                         } else if (data.role === "USER") {
                             navigate("/student/home", { replace: true });
                         }
@@ -54,7 +54,8 @@ const Home = () => {
                     }}
                 >
                     <div className="relative z-10 flex flex-col">
-                        <h1 className="text-4xl font-bold text-gray-900">Chào mừng bạn đến BK</h1>
+                        <h1 className="text-4xl font-bold text-gray-900">
+                            Chào mừng bạn đến với BK!</h1>
                         <p className="mt-4 text-lg text-gray-700">
                             Khám phá các dịch vụ và thông tin từ Đại học Bách Khoa.
                         </p>
@@ -62,9 +63,9 @@ const Home = () => {
                 </section>
 
                 {/* About Us section */}
-                <section className="flex flex-col items-center bg-gray-100 w-full px-8 py-16" id="about-us">
+                <section className="flex flex-col items-center bg-gray-100 w-full px-6 py-16" id="about-us">
                     <h2 className="text-4xl font-bold text-gray-800">Về chúng tôi</h2>
-                    <p className="mt-4 text-lg text-gray-600 text-center max-w-prose">
+                    <p className="mt-4 text-lg text-gray-600 text-center">
                         BK là một trong những trường đại học hàng đầu về khoa học kỹ thuật tại Việt Nam.
                     </p>
                 </section>
@@ -99,7 +100,7 @@ const Home = () => {
                             Liên hệ với chúng tôi để biết thêm thông tin chi tiết.
                         </p>
                     </div>
-                    <div className="w-64 h-64 bg-gray-300 rounded-lg flex items-center justify-center">
+                    <div className="w-32 h-32 bg-gray-300 rounded-lg flex items-center justify-center">
                         <span className="text-4xl text-gray-700">📞</span>
                     </div>
                 </section>

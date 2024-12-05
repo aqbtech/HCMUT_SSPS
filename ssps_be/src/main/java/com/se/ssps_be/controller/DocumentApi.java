@@ -2,6 +2,7 @@ package com.se.ssps_be.controller;
 
 import com.se.ssps_be.dto.DocsEle;
 import com.se.ssps_be.dto.UpdateDocsNameReq;
+import com.se.ssps_be.entity.Document;
 import com.se.ssps_be.mapper.DocsMapper;
 import com.se.ssps_be.repo.DocumentRepo;
 import com.se.ssps_be.service.impl.DocumentProvider;
@@ -11,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,16 +29,13 @@ public class DocumentApi {
 	public ResponseEntity<Page<DocsEle>> getAllDocuments(@RequestHeader(value = "Authorization") String authorizationHeader,
 														 @RequestParam(value = "page", defaultValue = "0") int page,
 														 @RequestParam(value = "size", defaultValue = "10") int size) {
-		// must get username from token here
 		String jwtToken = authorizationHeader.startsWith("Bearer ")
 				? authorizationHeader.substring(7)
 				: authorizationHeader;
-
-		// Lấy subject từ token
 		String username = JwtUtils.extractSubject(jwtToken);
 		Pageable pageable = PageRequest.of(page, size);
-		var documents = documentRepo.findByStudent_Username(username, pageable);
-		return ResponseEntity.ok(docsMapper.toDocsElePage(documents));
+		Page<Document> documentPage = documentRepo.findByStudent_UsernameAndDeletedFalse(username, pageable);
+		return ResponseEntity.ok(docsMapper.toDocsElePage(documentPage));
 	}
 
 	@PostMapping("/upload")
@@ -56,7 +52,7 @@ public class DocumentApi {
 
 	@PutMapping("/update-name")
 	public ResponseEntity<?> updateDocument(@RequestHeader(value = "Authorization") String authorizationHeader,
-			@RequestParam(value = "id") String id, @RequestBody UpdateDocsNameReq name) {
+											@RequestParam(value = "id") String id, @RequestBody UpdateDocsNameReq name) {
 		String jwtToken = authorizationHeader.startsWith("Bearer ")
 				? authorizationHeader.substring(7)
 				: authorizationHeader;
@@ -68,18 +64,22 @@ public class DocumentApi {
 	}
 
 	@DeleteMapping("/delete")
-	public ResponseEntity<?> deleteDocument(@RequestHeader(value = "Authorization") String authorizationHeader,@RequestParam String id) {
+	public ResponseEntity<?> deleteDocument(@RequestHeader(value = "Authorization") String authorizationHeader, @RequestParam String id) {
 		String jwtToken = authorizationHeader.startsWith("Bearer ")
 				? authorizationHeader.substring(7)
 				: authorizationHeader;
 
 		// Lấy subject từ token
 		String username = JwtUtils.extractSubject(jwtToken);
-		documentRepo.deleteById(Long.parseLong(id));
+		Document document = documentRepo.findById(Long.valueOf(id))
+				.orElseThrow(() -> new RuntimeException("Document not found"));
+		document.setDeleted(Boolean.TRUE);
+		documentRepo.save(document);
 		return ResponseEntity.ok(id);
 	}
+
 	@PostMapping("/download")
-	public ResponseEntity<?> downloadDocument(@RequestHeader(value = "Authorization") String authorizationHeader,@RequestParam String id) {
+	public ResponseEntity<?> downloadDocument(@RequestHeader(value = "Authorization") String authorizationHeader, @RequestParam String id) {
 		String jwtToken = authorizationHeader.startsWith("Bearer ")
 				? authorizationHeader.substring(7)
 				: authorizationHeader;
@@ -89,9 +89,10 @@ public class DocumentApi {
 //		documentProvider.downloadDocument(id, username);
 		return ResponseEntity.ok(id);
 	}
+
 	@GetMapping("page-count")
 	public ResponseEntity<?> getPageCount(@RequestHeader(value = "Authorization") String authorizationHeader,
-										   @RequestParam(value = "docid") Long docId) {
+										  @RequestParam(value = "docid") Long docId) {
 		String jwtToken = authorizationHeader.startsWith("Bearer ")
 				? authorizationHeader.substring(7)
 				: authorizationHeader;

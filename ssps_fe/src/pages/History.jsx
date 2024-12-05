@@ -7,19 +7,28 @@ const History = () => {
   const [history, setHistory] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  useEffect(()=> {
+
+  // useEffect để kiểm tra token (nếu cần thiết)
+  useEffect(() => {
     const token = Cookies.get("TOKEN");
-    if(!token) window.location.href = "http://localhost:8081/sso/login";
-  })
+    if (!token) {
+      window.alert("Vui lòng đăng nhập để sử dụng dịch vụ!");
+      window.location.href = "http://localhost:8081/sso/login";
+    }
+  }, []);
+
   // Fetch dữ liệu từ API
   useEffect(() => {
     const fetchHistory = async () => {
       const result = await sendGetRequest('GET', `/api/v1/log/log?page=${page}&size=10`);
+
       if (result) {
         setHistory(result.content);
         setTotalPages(result.page.totalPages);
       }
+      console.log(result);
     };
+
     fetchHistory();
   }, [page]);
 
@@ -41,14 +50,15 @@ const History = () => {
           <table className="w-full table-auto border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-300 px-4 py-2">#</th>
-                <th className="border border-gray-300 px-4 py-2">Thời Gian</th>
-                <th className="border border-gray-300 px-4 py-2">Tên File</th>
-                <th className="border border-gray-300 px-4 py-2">Máy In</th>
-                <th className="border border-gray-300 px-4 py-2">Vị Trí</th>
-                <th className="border border-gray-300 px-4 py-2">Số Bản</th>
-                <th className="border border-gray-300 px-4 py-2">Trạng Thái</th>
-                <th className="border border-gray-300 px-4 py-2">Chi Phí</th>
+                <th className="border border-gray-300 px-4 py-2">STT</th>
+                <th className="border border-gray-300 px-4 py-2">Thời gian</th>
+                <th className="border border-gray-300 px-4 py-2">Tên tài liệu</th>
+                <th className="border border-gray-300 px-4 py-2">Máy in</th>
+                <th className="border border-gray-300 px-4 py-2">Vị trí</th>
+                <th className="border border-gray-300 px-3 py-2">Khổ giấy</th>
+                <th className="border border-gray-300 px-3 py-2">Số bản in</th>
+                <th className="border border-gray-300 px-4 py-2">Trạng thái</th>
+                <th className="border border-gray-300 px-4 py-2">Tổng số trang(A4)</th>
               </tr>
             </thead>
             <tbody>
@@ -62,9 +72,10 @@ const History = () => {
                     <td className="border border-gray-300 px-4 py-2">
                       {log.location.campus}, {log.location.building}, {log.location.room}
                     </td>
+                    <td className="border border-gray-300 px-4 py-2">{log.pageType}</td>
                     <td className="border border-gray-300 px-4 py-2">{log.numberOfCopy}</td>
                     <td className="border border-gray-300 px-4 py-2">{log.status}</td>
-                    <td className="border border-gray-300 px-4 py-2">{log.cost} VND</td>
+                    <td className="border border-gray-300 px-4 py-2">{log.cost}</td>
                   </tr>
                 ))
               ) : (
@@ -80,13 +91,13 @@ const History = () => {
           {/* Phân trang */}
           <div className="flex justify-between items-center mt-4">
             <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 0}
-              className={`px-4 py-2 rounded ${
-                page === 0
-                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page === 0}
+                className={`px-4 py-2 rounded ${
+                    page === 0
+                        ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
             >
               Previous
             </button>
@@ -94,21 +105,22 @@ const History = () => {
               Trang {page + 1} / {totalPages}
             </span>
             <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page + 1 >= totalPages}
-              className={`px-4 py-2 rounded ${
-                page + 1 >= totalPages
-                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page + 1 >= totalPages}
+                className={`px-4 py-2 rounded ${
+                    page + 1 >= totalPages
+                        ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
             >
               Next
             </button>
           </div>
-        </div>
-      </main>
     </div>
-  );
+</main>
+</div>
+)
+  ;
 };
 
 export default History;

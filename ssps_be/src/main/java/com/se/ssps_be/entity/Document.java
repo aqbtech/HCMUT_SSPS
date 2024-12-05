@@ -24,8 +24,10 @@ public abstract class Document {
 	private DocsType type;
 	@Column(nullable = false)
 	private Integer totalPages;
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private Boolean deleted = Boolean.FALSE;
 	@Lob
-	@Column(name = "data", nullable = false, columnDefinition = "MEDIUMBLOB")
+	@Column(name = "data", nullable = false, columnDefinition = "LONGBLOB")
 	@Basic(fetch = FetchType.LAZY)
 	private byte[] content;
 

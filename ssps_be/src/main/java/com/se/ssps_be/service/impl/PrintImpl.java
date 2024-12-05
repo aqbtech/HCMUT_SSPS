@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -49,14 +51,10 @@ public class PrintImpl implements PrintService {
 		PrintJob printJob = printJobMapper.toPrintJob(printRequest);
 
 		// calculate balance of print request
-		int printedPages = getPrintedPages(printRequest, document);
+		int printedPages = calculateA4PaperConsumption(printRequest, document);
 		int balance = printRequest.getNumberOfCopies() * printedPages;
-		int usedPage = student.getUsedPage();
-		int defaultpage = systemConfigRepository.findByActiveIsTrue()
-				.orElseThrow(() -> new RuntimeException("System Config has some error!"))
-				.getDefaultPagesPerSemester();
-		if(usedPage + document.getTotalPages() > defaultpage){
-			throw new IllegalArgumentException("Request was denied cause your page does not enough");
+		if(document.getDeleted()){
+			throw new IllegalArgumentException("Document is deleted");
 		}
 
 		printJob.setBalanceConsumed(balance);
@@ -74,12 +72,12 @@ public class PrintImpl implements PrintService {
 		// log the print job to db
 		LogInfo logInfo = logService.createLogInfo(printJob);
 
-		if (student.getRemainingBalance() < balance) {
+		if (student.getRemainingBalance() < 0 || student.getRemainingBalance() < balance) {
 			// print job failed
 			printJob.setState(PrintState.NOT_ENOUGH_BALANCE);
+			state = PrintState.NOT_ENOUGH_BALANCE;
 //			throw new IllegalArgumentException("Not enough balance"); // TODOd: also log to db
 		}
-		printJob.setLogInfo(logInfo);
 		printJob.setLogInfo(logInfo);
 		printJobRepo.save(printJob);
 		logService.saveLogInfo(logInfo);
@@ -92,19 +90,43 @@ public class PrintImpl implements PrintService {
 	}
 
 	private int getPrintedPages(PrintRequest printRequest, Document document) {
+		// Lấy số trang dựa trên phạm vi trang được chọn
 		int printedPages = switch (printRequest.getPageRange()) {
 			case "all" -> document.getTotalPages();
-			case "even" -> document.getTotalPages() % 2;
-			case "odd" -> {
-				int var1 = document.getTotalPages();
-				yield var1 % 2 == 0 ? var1 / 2 : var1 / 2 + 1;
-			}
-			case "custom" -> printRequest.getMax() - printRequest.getMin() + 1;
-			default -> throw new IllegalArgumentException("Not support page range");
+			case "even" -> (int) Math.ceil(document.getTotalPages() / 2.0); // Trang chẵn
+			case "odd" -> (int) Math.ceil((document.getTotalPages() + 1) / 2.0); // Trang lẻ
+			case "custom" -> printRequest.getMax() - printRequest.getMin() + 1; // Phạm vi tùy chọn
+			default -> throw new IllegalArgumentException("Not supported page range");
 		};
+
 		if (printedPages <= 0) {
 			throw new IllegalArgumentException("Invalid page range");
 		}
 		return printedPages;
 	}
+
+	private int calculateA4PaperConsumption(PrintRequest printRequest, Document document) {
+		// Số trang thực tế cần in
+		int printedPages = getPrintedPages(printRequest, document);
+
+		// Tính số tờ giấy cần dùng theo khổ giấy
+		int sheetsNeeded = printRequest.getPageType().equals("double")
+				? (int) Math.ceil((double) printedPages / 2) // Double-sided: mỗi tờ chứa 2 trang
+				: printedPages; // Single-sided: mỗi tờ chứa 1 trang
+
+		// Quy đổi số tờ giấy này về số trang A4 tiêu hao
+		int a4PagesPerSheet = switch (printRequest.getPaperSize()) {
+			case A1 -> 16; // A1 = 16 trang A4
+			case A2 -> 8;  // A2 = 8 trang A4
+			case A3 -> 4;  // A3 = 4 trang A4
+			case A4 -> 1;  // A4 = 1 trang A4
+			case A5 -> 1 / 2; // A5 = 1/2 trang A4
+			default -> throw new IllegalStateException("Unexpected paper size: " + printRequest.getPaperSize());
+		};
+
+		// Tổng số trang A4 tiêu hao
+		return sheetsNeeded * a4PagesPerSheet;
+	}
+
+
 }
