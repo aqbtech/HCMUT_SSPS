@@ -20,6 +20,7 @@ const Printer_Manage = () => {
     remainingBlackInk: 'false',
     supportedPaperSize: 'A4'
   });
+
   const [printers, setPrinters] = useState([]);
   const [configData, setConfigData] = useState({
     defaultPagesPerSemester: 100,
@@ -27,7 +28,6 @@ const Printer_Manage = () => {
     defaultStartDateForPages: '2025-01-01'
   });
 
-  useEffect(() => {
     // Fetch the list of printers from the backend
     const fetchPrinters = async () => {
       const response = await sendGetRequest(`/api/v1/spso/printer`);
@@ -36,7 +36,6 @@ const Printer_Manage = () => {
       }
     };
     fetchPrinters();
-  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -119,22 +118,16 @@ const Printer_Manage = () => {
     setConfigModalIsOpen(false);
   };
 
-  const handleChangeState = (printerId, status) => {
+        ? configData.allowedFileTypes.split(',')
 
-    const payload = {
+        : configData.allowedFileTypes
 
-      printerId,
-
-      status
 
     };
 
     sendRequest('PUT', '/api/v1/spso/printer/update_status', payload)
-
       .then(response => {
-
         console.log(response);
-
         if (response.code === 200) {
 
           // alert(response.result);
@@ -146,18 +139,36 @@ const Printer_Manage = () => {
             printer.printerId === printerId ? { ...printer, status } : printer
 
           ));
-
         }
-
       })
-
       .catch(error => {
-
         console.error('Error:', error);
-
       });
-
+    setConfigModalIsOpen(false);
   };
+
+  const handleChangeState = (printerId, currentStatus) => {
+  const newStatus = currentStatus !== 'enabled';
+
+  const payload = {
+    printerId,
+    newStatus
+  };
+
+  sendRequest('PUT', '/api/v1/spso/printer/update_status', payload)
+    .then(response => {
+      console.log(response);
+      if (response.code === 200) {
+        // Refresh the printer list after changing the state
+        setPrinters(printers.map(printer => 
+          printer.printerId === printerId ? { ...printer, newStatus} : printer
+        ));
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+};
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
@@ -179,7 +190,6 @@ const Printer_Manage = () => {
             Change Config
           </button>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {printers.map((printer) => (
             <div
@@ -248,7 +258,7 @@ const Printer_Manage = () => {
         style={{ maxHeight: '90vh' }}
       >
         <h2 className="text-2xl font-bold mb-4">Add Printer</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[70vh]">
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="brand">
               Brand
@@ -398,6 +408,7 @@ const Printer_Manage = () => {
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              onClick={handleSubmit}
             >
               Submit
             </button>
