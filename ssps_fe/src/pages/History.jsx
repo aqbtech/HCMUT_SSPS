@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import StudentHeader from '../component/StudentHeader';
 import sendGetRequest from '../API/fetchAPI';
 import Cookies from "js-cookie";
+import { toast } from 'react-toastify';
 
 const History = () => {
   const [history, setHistory] = useState([]);
@@ -12,7 +13,7 @@ const History = () => {
   useEffect(() => {
     const token = Cookies.get("TOKEN");
     if (!token) {
-      window.alert("Vui lòng đăng nhập để sử dụng dịch vụ!");
+      toast.error("Vui lòng đăng nhập để sử dụng dịch vụ!");
       window.location.href = "http://localhost:8081/sso/login";
     }
   }, []);

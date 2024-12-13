@@ -52,13 +52,13 @@ const SPSOHistory = () => {
     <div className="bg-gray-100 min-h-screen flex flex-col">
       <SPSOHeader />
       <div className="container mx-auto py-10 px-4 flex-1">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Printer History</h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Lịch Sử Máy In</h1>
 
-        {/* Search Forms */}
+        {/* Form tìm kiếm */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <form onSubmit={handleSubmit} className="bg-white p-4 rounded-md shadow-md">
             <div className="flex flex-col md:flex-row md:items-center">
-              <label htmlFor="printerId" className="mr-2 mb-2 md:mb-0">Printer ID:</label>
+              <label htmlFor="printerId" className="mr-2 mb-2 md:mb-0">ID Máy In:</label>
               <input
                 type="text"
                 id="printerId"
@@ -67,21 +67,21 @@ const SPSOHistory = () => {
                 onChange={handleInputChange}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline   
  flex-grow"
-                placeholder="Enter Printer ID"
+                placeholder="Nhập ID Máy In"
                 required
               />
               <button
                 type="submit"
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2 md:mt-0 ml-0 md:ml-2"
               >
-                Search
+                Tìm Kiếm
               </button>
             </div>
           </form>
 
           <form onSubmit={handleDateSubmit} className="bg-white p-4 rounded-md shadow-md">
             <div className="flex flex-col md:flex-row md:items-center">
-              <label htmlFor="date" className="mr-2 mb-2 md:mb-0">Date:</label>
+              <label htmlFor="date" className="mr-2 mb-2 md:mb-0">Ngày:</label>
               <input
                 type="date"
                 id="date"
@@ -96,26 +96,26 @@ const SPSOHistory = () => {
                 type="submit"
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2 md:mt-0 ml-0 md:ml-2"
               >
-                Search
+                Tìm Kiếm
               </button>
             </div>
           </form>
         </div>
 
-        {/* History List */}
-        <div className="bg-white p-6 rounded-md shadow-md overflow-x-auto"> {/* Added overflow-x-auto */}
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Printing History</h2>
+        {/* Lịch sử in */}
+        <div className="bg-white p-6 rounded-md shadow-md overflow-x-auto">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Lịch Sử In</h2>
           {history.length > 0 ? (
-            <table className="min-w-full"> {/* Use a table for better data organization */}
+            <table className="min-w-full">
               <thead>
                 <tr>
-                  <th className="py-2 px-4 border-b text-left">Student</th>
-                  <th className="py-2 px-4 border-b text-left">Printer</th>
-                  <th className="py-2 px-4 border-b text-left">File Name</th>
-                  <th className="py-2 px-4 border-b text-left">Total Pages</th>
-                  <th className="py-2 px-4 border-b text-left">Paper Size</th>
-                  <th className="py-2 px-4 border-b text-left">Start Time</th>
-                  <th className="py-2 px-4 border-b text-left">End Time</th>
+                  <th className="py-2 px-4 border-b text-left">Sinh Viên</th>
+                  <th className="py-2 px-4 border-b text-left">Máy In</th>
+                  <th className="py-2 px-4 border-b text-left">Tên Tệp</th>
+                  <th className="py-2 px-4 border-b text-left">Tổng Số Trang</th>
+                  <th className="py-2 px-4 border-b text-left">Khổ Giấy</th>
+                  <th className="py-2 px-4 border-b text-left">Thời Gian Bắt Đầu</th>
+                  <th className="py-2 px-4 border-b text-left">Thời Gian Kết Thúc</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,12 +133,11 @@ const SPSOHistory = () => {
               </tbody>
             </table>
           ) : (
-            <p className="text-gray-600">No history available.</p>
+            <p className="text-gray-600">Không có lịch sử in nào.</p>
           )}
         </div>
       </div>
     </div>
   );
 };
-
 export default SPSOHistory;
