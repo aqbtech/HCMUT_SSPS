@@ -138,7 +138,7 @@ const Print = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
+    <div className=" min-h-screen flex flex-col">
       <StudentHeader />
       <div className="container mx-auto py-10 px-4 flex-1">
         <h1 className="text-2xl font-bold text-center mb-6">In tài liệu</h1>
@@ -157,8 +157,8 @@ const Print = () => {
             <tbody>
               {docs.map((doc, index) => (
                 <tr key={doc.id} className="odd:bg-gray-50 even:bg-white">
-                  <td className="px-4 py-2 flex items-center"> 
-                    <img src={file_icon} alt="File" className="w-5 h-5 mr-2" /> 
+                  <td className="px-4 py-2 flex items-center">
+                    <img src={file_icon} alt="File" className="w-5 h-5 mr-2" />
                   </td>
                   <td className="px-4 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="px-4 py-2">{doc.name}</td>

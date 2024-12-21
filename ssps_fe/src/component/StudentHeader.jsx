@@ -51,10 +51,12 @@ export default function StudentHeader() {
             </div>
 
             {/* Navigation Bar */}
-            <nav className="flex items-center space-x-1">
+            <nav className="flex items-center space-x-1 justify-center flex-1"> {/* Thêm justify-center và flex-1 */}
                 {items.map((item, index) => (
-                    <div key={index}
-                         className="hover:border-black rounded-lg p-2">
+                    <div
+                        key={index}
+                        className="border-gray-300 hover:border-black rounded-lg p-4 transition-all duration-300"
+                    >
                         <a
                             href={item.link}
                             className="text-gray-800 hover:text-blue-500 hover:underline transition px-4 py-2 font-semibold shadow-sm"
@@ -77,7 +79,8 @@ export default function StudentHeader() {
 
                     {dropdownOpen && (
                         <div
-                            className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg z-20">
+                            className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg z-20"
+                        >
                             <button
                                 onClick={handleStudentInfoClick}
                                 className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md transition duration-200"
@@ -94,7 +97,6 @@ export default function StudentHeader() {
                     )}
                 </div>
             </div>
-
         </header>
     );
 }

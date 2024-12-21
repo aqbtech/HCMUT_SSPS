@@ -266,7 +266,7 @@ public class SPSOServiceImpl implements SPSOService {
         int totalJobs = results.size();
         int totalPages = 0;
         for(PrintJob printJob : results){
-            totalPages += printJob.getTotalPages();
+            totalPages += printJob.getBalanceConsumed();
         }
 
         // Map kết quả truy vấn thành DTO
@@ -293,7 +293,7 @@ public class SPSOServiceImpl implements SPSOService {
         int totalJobs = results.size();
         int totalPages = 0;
         for(PrintJob printJob : results){
-            totalPages += printJob.getTotalPages();
+            totalPages += printJob.getBalanceConsumed();
         }
 
         // Lưu vào database
