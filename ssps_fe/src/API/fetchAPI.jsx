@@ -3,6 +3,7 @@ import axios from "axios";
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import * as response from "autoprefixer";
 
 export const axiosClient = axios.create({
     baseURL: `http://localhost:8080`,
@@ -36,7 +37,6 @@ axiosClient.interceptors.response.use(
 
     async (response) => {
         const refreshToken = Cookies.get('TOKEN');
-        console.log({refreshToken});
             if (refreshToken) {
                 try {
                     const response = await sendRefreshRequest(refreshToken);
@@ -116,4 +116,13 @@ export default async function sendRequest(method, path, data) {
         // window.alert(`${method} Request failed: ${error.message}`);
         return error.response.data;
     }
+}
+
+export  async function buyPage(quantity) {
+    const body = {
+        quantity: quantity
+    }
+    const reponse = await axiosClient.post(`/api/v1/student/buypages`, body);
+    console.log("Mua giay:", reponse);
+    return response;
 }
