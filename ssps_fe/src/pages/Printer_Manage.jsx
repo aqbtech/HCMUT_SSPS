@@ -3,6 +3,7 @@ import SPSOHeader from '../component/SPSOHeader';
 import sendRequest, {sendGetRequest} from '../API/fetchAPI';
 import Modal from 'react-modal';
 import printer_icon from '../assets/printer_icon.png';
+import { toast } from 'react-toastify';
 
 const Printer_Manage = () => {
   const [selectedPrinter, setSelectedPrinter] = useState(null);
@@ -17,8 +18,8 @@ const Printer_Manage = () => {
     room: '',
     pageCapacity: '',
     remainingPage: '',
-    remainingBlackInk: 'false',
-    supportedPaperSize: 'A4'
+    remainingBlackInk: '',
+    supportedPaperSize: ''
   });
   const [printers, setPrinters] = useState([]);
   const [configData, setConfigData] = useState({
@@ -28,155 +29,189 @@ const Printer_Manage = () => {
   });
 
   useEffect(() => {
-    // Fetch the list of printers from the backend
-    const fetchPrinters = async () => {
-      const response = await sendGetRequest(`/api/v1/spso/printer`);
-      if (response && response.result) {
-        setPrinters(response.result);
-      }
-    };
     fetchPrinters();
   }, []);
+  // Fetch the list of printers from the backend
+  const fetchPrinters = async () => {
+    const response = await sendGetRequest(`/api/v1/spso/printer`);
+    if (response && response.result) {
+      setPrinters(response.result);
+    }
+    console.log(response)
+  };
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === 'checkbox' ? checked : value
     });
   };
 
-  const handleSubmit
-      = (e) => {
-    e.preventDefault();
 
+  const handleInputChangePaperType = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prevFormData) => {
+      if (type === "checkbox" && name === "supportedPaperSize") {
+        // Xử lý cho checkbox (danh sách các kiểu trang)
+        const updatedList = checked
+            ? [...prevFormData[name], value] // Thêm giá trị nếu được chọn
+            : prevFormData[name].filter((item) => item !== value); // Xóa giá trị nếu bỏ chọn
+
+        const flattenedList = Array.isArray(updatedList)
+            ? updatedList.flat()
+            : updatedList;
+        console.log("123456789",flattenedList)
+        return {
+          ...prevFormData,
+          [name]: flattenedList,
+        };
+      } else {
+        // Xử lý cho các input thông thường (text, number, ...)
+        return {
+          ...prevFormData,
+          [name]: value,
+        };
+      }
+    });
+  };
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    formData.remainingPage = formData.pageCapacity;
     const payload = {
       ...formData,
-      remainingBlackInk: formData.remainingBlackInk === "true",
-      supportedPaperSize: [formData.supportedPaperSize],
+      remainingBlackInk: formData.remainingBlackInk === 'true',
+      supportedPaperSize: formData.supportedPaperSize
     };
-    sendRequest("POST", "/api/v1/spso/printer/add", payload)
-        .then((response) => {
-          console.log(response);
-          if (response.code === 200) {
-            toast.success(response.result);
-            // Refresh the printer list after adding a new printer
-            fetchPrinters(); // Call fetchPrinters to update the list
-            setFormData({
-              // Reset the form after adding
-              brand: "",
-              name: "",
-              description: "",
-              campus: "",
-              building: "",
-              room: "",
-              pageCapacity: "",
-              remainingPage: "",
-              remainingBlackInk: "false",
-              supportedPaperSize: "A4",
-            });
-          } else {
-            toast.error("Failed to add printer");
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          toast.error("An error occurred");
+    try {
+      console.log("HAHAHAHAHAHA",payload);
+      if(formData.brand === "")
+        return toast.error("Vui lòng nhập loại máy in")
+      if(formData.name === "")
+          return toast.error("Vui lòng nhập tên máy in")
+      if(formData.campus === "")
+        return toast.error("Vui lòng nhập cơ sở")
+      if(formData.building === "")
+        return toast.error("Vui lòng nhập tòa")
+      if(formData.room === "")
+        return toast.error("Vui lòng nhập phòng")
+      if(formData.pageCapacity === "")
+        return toast.error("Vui lòng nhập số trang")
+      if(formData.supportedPaperSize === "")
+        return toast.error("Vui lòng chọn ít nhất 1 kiểu trang")
+
+
+
+
+      const response = await sendRequest('POST', '/api/v1/spso/printer/add', payload);
+      console.log(response);
+      if (response.code === 200) {
+        toast.success(response.result);
+        fetchPrinters(); // Refresh the printer list after adding a new printer
+        setFormData({
+          // Reset the form after adding
+          brand: '',
+          name: '',
+          description: '',
+          campus: '',
+          building: '',
+          room: '',
+          pageCapacity: '',
+          remainingPage: '',
+          remainingBlackInk: '',
+          supportedPaperSize: ''
         });
-    setModalIsOpen(false);
+        setModalIsOpen(false);
+      } else {
+        toast.error('Failed to add printer');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An error occurred');
+    }
+
   };
 
   const handleConfigInputChange = (e) => {
     const { name, value } = e.target;
+    if(e.target.value < 1)
+        e.target.value = 1
     setConfigData({
       ...configData,
       [name]: value
     });
   };
 
-
-  const handleConfigSubmit = (e) => {
+  const handleConfigSubmit = async (e) => {
     e.preventDefault();
     const payload = {
       ...configData,
       allowedFileTypes: typeof configData.allowedFileTypes === 'string'
-
           ? configData.allowedFileTypes.split(',')
-
           : configData.allowedFileTypes
-
-
     };
-    sendRequest('POST', '/api/v1/spso/printer/config', payload)
-        .then(response => {
-          console.log(response);
-          if (response.code === 200) {
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
+    try {
+      const response = await sendRequest('POST', '/api/v1/spso/printer/config', payload);
+      console.log(response);
+      if (response.code === 200) {
+        toast.success("Thay đổi cấu hình thành công.");
+        // Additional logic if needed
+      } else {
+        toast.error('Failed to update config');
+      }
+    } catch (error) {
+      toast.error('Error updating config');
+      console.error('Error:', error);
+    }
     setConfigModalIsOpen(false);
   };
 
-  const handleChangeState = (printerId, status) => {
-
+  const handleChangeState = async (printerId, status1) => {
+    let tmp = status1 === "enabled" ? false : true;
     const payload = {
-
       printerId,
-
-      status
-
+      status : tmp
     };
-
-    sendRequest('PUT', '/api/v1/spso/printer/update_status', payload)
-
-        .then(response => {
-
-          console.log(response);
-
-          if (response.code === 200) {
-
-            // alert(response.result);
-
-            // Refresh the printer list after changing the state
-
-            setPrinters(printers.map(printer =>
-
-                printer.printerId === printerId ? { ...printer, status } : printer
-
-            ));
-
-          }
-
-        })
-
-        .catch(error => {
-
-          console.error('Error:', error);
-
-        });
-
+    console.log("123", payload)
+    try {
+      const response = await sendRequest('PUT', '/api/v1/spso/printer/update_status', payload);
+      console.log(response);
+      if (response.code === 200) {
+        fetchPrinters();
+        toast.success("Cập nhật trạng thái máy in thành công!", response.result);
+        // setPrinters(printers.map(printer =>
+        //     printer.printerId === printerId ? { ...printer, description: status1} : printer
+        // ));
+      }
+      setModalIsOpen(false);
+    } catch (error) {
+      toast.error('Error updating printer status');
+      console.error('Error:', error);
+    }
   };
 
   return (
       <div className="bg-gray-100 min-h-screen flex flex-col">
         <SPSOHeader />
         <div className="container mx-auto py-10 px-4 flex-1">
-          <h1 className="text-2xl font-bold text-center mb-6">Printer Manage</h1>
+          <h1 className="text-2xl font-bold text-center mb-6">Quản Lý Máy In</h1>
           <div className="flex justify-between mb-6">
             <button
                 onClick={() => setModalIsOpen(true)}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
-              Add Printer
+              Thêm Máy In
             </button>
 
             <button
                 onClick={() => setConfigModalIsOpen(true)}
                 className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
             >
-              Change Config
+              Thay Đổi Cấu Hình Máy In
             </button>
           </div>
 
@@ -199,7 +234,7 @@ const Printer_Manage = () => {
           </div>
         </div>
         <Modal
-            isOpen={!!selectedPrinter} // Open modal when a printer is selected
+            isOpen={selectedPrinter} // Open modal when a printer is selected
             onRequestClose={() => setSelectedPrinter(null)}
             contentLabel="Printer Details"
             className="bg-white p-6 rounded shadow-md w-full max-w-lg mx-auto mt-20"
@@ -210,36 +245,40 @@ const Printer_Manage = () => {
                   {selectedPrinter.brand} {selectedPrinter.model}
                 </h2>
                 <p>
-                  <span className="font-bold">Description:</span>{" "}
+                  <span className="font-bold">Trạng thái:</span>{" "}
                   {selectedPrinter.description}
                 </p>
                 <p>
-                  <span className="font-bold">Location:</span>{" "}
+                  <span className="font-bold">Địa điểm:</span>{" "}
                   {selectedPrinter.location}
                 </p>
                 <p>
-                  <span className="font-bold">Page Capacity:</span>{" "}
-                  {selectedPrinter.pageCapacity}
+                  <span className="font-bold">Số trang còn lại:</span>{" "}
+                  {selectedPrinter.remainingPage}
                 </p>
-                {/* ... add other properties as needed */}
                 <button
-                    onClick={() =>
-                        handleChangeState(
-                            selectedPrinter.printerId,
-                            !selectedPrinter.status
-                        )
-                    }
+                    onClick={() => {
+                      // Gọi hàm handleChangeState để cập nhật trạng thái
+                      handleChangeState(
+                          selectedPrinter.printerId,
+                          selectedPrinter.description === "enabled" ? "enabled" : "disabled" // Đảo trạng thái
+                      );
+
+                      // Đóng modal sau khi cập nhật
+                      setSelectedPrinter(null);
+                    }}
                     className={`${
-                        selectedPrinter.status
+                        selectedPrinter.description === "enabled"
                             ? "bg-red-500 hover:bg-red-700"
                             : "bg-green-500 hover:bg-green-700"
                     } text-white font-bold py-2 px-4 rounded mt-4`}
                 >
-                  {selectedPrinter.status ? "Disable" : "Enable"}
+                  {selectedPrinter.description === "disabled" ? "Hiện" : "Ẩn"}
                 </button>
               </div>
           )}
         </Modal>
+
         <Modal
             isOpen={modalIsOpen}
             onRequestClose={() => setModalIsOpen(false)}
@@ -247,182 +286,11 @@ const Printer_Manage = () => {
             className="bg-white p-6 rounded shadow-md w-full max-w-lg mx-auto mt-20 overflow-auto"
             style={{ maxHeight: '90vh' }}
         >
-          <h2 className="text-2xl font-bold mb-4">Add Printer</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="brand">
-                Brand
-              </label>
-              <input
-                  type="text"
-                  id="brand"
-                  name="brand"
-                  value={formData.brand}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-                Name
-              </label>
-              <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-                Description
-              </label>
-              <input
-                  type="text"
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="campus">
-                Campus
-              </label>
-              <input
-                  type="text"
-                  id="campus"
-                  name="campus"
-                  value={formData.campus}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="building">
-                Building
-              </label>
-              <input
-                  type="text"
-                  id="building"
-                  name="building"
-                  value={formData.building}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="room">
-                Room
-              </label>
-              <input
-                  type="text"
-                  id="room"
-                  name="room"
-                  value={formData.room}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pageCapacity">
-                Page Capacity
-              </label>
-              <input
-                  type="number"
-                  id="pageCapacity"
-                  name="pageCapacity"
-                  value={formData.pageCapacity}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="remainingPage">
-                Remaining Page
-              </label>
-              <input
-                  type="number"
-                  id="remainingPage"
-                  name="remainingPage"
-                  value={formData.remainingPage}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="remainingBlackInk">
-                Remaining Black Ink
-              </label>
-              <select
-                  id="remainingBlackInk"
-                  name="remainingBlackInk"
-                  value={formData.remainingBlackInk}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              >
-                <option value="true">True</option>
-                <option value="false">False</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="supportedPaperSize">
-                Supported Paper Size
-              </label>
-              <select
-                  id="supportedPaperSize"
-                  name="supportedPaperSize"
-                  value={formData.supportedPaperSize}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              >
-                <option value="A4">A4</option>
-                <option value="A3">A3</option>
-                <option value="A5">A5</option>
-              </select>
-            </div>
-            <div className="flex items-center justify-between">
-              <button
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Submit
-              </button>
-              <button
-                  type="button"
-                  onClick={() => setModalIsOpen(false)}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </Modal>
-        <Modal
-            isOpen={modalIsOpen}
-            onRequestClose={() => setModalIsOpen(false)}
-            contentLabel="Add Printer"
-            className="bg-white p-6 rounded shadow-md w-full max-w-lg mx-auto mt-20 overflow-auto"
-            style={{ maxHeight: '90vh' }}
-        >
-          <h2 className="text-2xl font-bold mb-4">Add Printer</h2>
+          <h2 className="text-2xl font-bold mb-4">Thêm Máy In</h2>
           <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[70vh]">
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="brand">
-                Brand
+                Loại Máy In
               </label>
               <input
                   type="text"
@@ -436,7 +304,7 @@ const Printer_Manage = () => {
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-                Name
+                Tên Máy In
               </label>
               <input
                   type="text"
@@ -449,22 +317,27 @@ const Printer_Manage = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-                Description
+              <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="description"
+              >
+                Trạng thái
               </label>
-              <input
-                  type="text"
+              <select
                   id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
-              />
+              >
+                <option value="enabled">enabled</option>
+                <option value="disabled">disabled</option>
+              </select>
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="campus">
-                Campus
+                Cơ sở
               </label>
               <input
                   type="text"
@@ -478,7 +351,7 @@ const Printer_Manage = () => {
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="building">
-                Building
+                Tòa
               </label>
               <input
                   type="text"
@@ -492,7 +365,7 @@ const Printer_Manage = () => {
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="room">
-                Room
+                Phòng
               </label>
               <input
                   type="text"
@@ -505,36 +378,30 @@ const Printer_Manage = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pageCapacity">
-                Page Capacity
+              <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="pageCapacity"
+              >
+                Số Trang
               </label>
               <input
                   type="number"
                   id="pageCapacity"
                   name="pageCapacity"
+                  min="1"
+                  max="2000000"
                   value={formData.pageCapacity}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="remainingPage">
-                Remaining Page
-              </label>
-              <input
-                  type="number"
-                  id="remainingPage"
-                  name="remainingPage"
-                  value={formData.remainingPage}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = Math.max(1, Math.min(2000000, Number(e.target.value))); // Giới hạn giá trị
+                    handleInputChange({target: {name: "pageCapacity", value}}); // Gửi giá trị hợp lệ vào state
+                  }}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
               />
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="remainingBlackInk">
-                Remaining Black Ink
+                Số Mực Đen Còn Lại
               </label>
               <select
                   id="remainingBlackInk"
@@ -549,18 +416,33 @@ const Printer_Manage = () => {
               </select>
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="supportedPaperSize">
-                Supported Paper Size
+              <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="supportedPaperSize"
+              >
+                Các Kiểu Trang
               </label>
-              <input
-                  type="text"
-                  id="supportedPaperSize"
-                  name="supportedPaperSize"
-                  value={formData.supportedPaperSize}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-              />
+              <div id="supportedPaperSize" className="flex flex-wrap gap-4">
+                {["A1", "A2", "A3", "A4", "A5"].map((size) => (
+                    <label key={size} className="inline-flex items-center">
+                      <input
+                          type="checkbox"
+                          name="supportedPaperSize"
+                          value={size}
+                          checked={formData.supportedPaperSize.includes(size)}
+                          onChange={(e) => {
+                            const newSizes = e.target.checked
+                                ? [...formData.supportedPaperSize, size] // Thêm kích thước nếu được chọn
+                                : formData.supportedPaperSize.filter((s) => s !== size); // Loại bỏ kích thước nếu bỏ chọn
+                            console.log("12345", newSizes);
+                            handleInputChangePaperType({target: {name: "supportedPaperSize", value: newSizes}});
+                          }}
+                          className="form-checkbox h-5 w-5 text-blue-600"
+                      />
+                      <span className="ml-2">{size}</span>
+                    </label>
+                ))}
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <button
@@ -568,14 +450,14 @@ const Printer_Manage = () => {
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                   onClick={handleSubmit}
               >
-                Submit
+                Xác Nhận
               </button>
               <button
                   type="button"
                   onClick={() => setModalIsOpen(false)}
                   className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                Cancel
+                Hủy
               </button>
             </div>
           </form>
@@ -585,17 +467,18 @@ const Printer_Manage = () => {
             onRequestClose={() => setConfigModalIsOpen(false)}
             contentLabel="Change Config"
             className="bg-white p-6 rounded shadow-md w-full max-w-lg mx-auto mt-20 overflow-auto"
-            style={{ maxHeight: '90vh' }}
+            style={{maxHeight: '90vh'}}
         >
-          <h2 className="text-2xl font-bold mb-4">Change Config</h2>
+          <h2 className="text-2xl font-bold mb-4">Thay Đổi Cấu Hình Máy In</h2>
           <form onSubmit={handleConfigSubmit}>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="defaultPagesPerSemester">
-                Default Pages Per Semester
+                Số Trang Mặc Định Trong Một Học Kỳ
               </label>
               <input
                   type="number"
                   id="defaultPagesPerSemester"
+                  min="1"
                   name="defaultPagesPerSemester"
                   value={configData.defaultPagesPerSemester}
                   onChange={handleConfigInputChange}
@@ -605,7 +488,7 @@ const Printer_Manage = () => {
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="allowedFileTypes">
-                Allowed File Types
+                Các Loại File Hỗ Trợ
               </label>
               <input
                   type="text"
@@ -620,7 +503,7 @@ const Printer_Manage = () => {
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="defaultStartDateForPages">
-                Default Start Date For Pages
+                Ngày Cài Lại Số Trang Mặc Định
               </label>
               <input
                   type="date"
@@ -637,14 +520,14 @@ const Printer_Manage = () => {
                   type="submit"
                   className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                Submit
+                Xác Nhận
               </button>
               <button
                   type="button"
                   onClick={() => setConfigModalIsOpen(false)}
                   className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                Cancel
+                Hủy
               </button>
             </div>
           </form>
