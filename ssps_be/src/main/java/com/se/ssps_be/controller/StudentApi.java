@@ -3,10 +3,12 @@ package com.se.ssps_be.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.se.ssps_be.dto.request.BuyPagesRequest;
 import com.se.ssps_be.dto.response.StudentInformationResponse;
 import com.se.ssps_be.entity.Student;
 import com.se.ssps_be.mapper.StudentMapper;
 import com.se.ssps_be.repo.StudentRepo;
+import com.se.ssps_be.service.fakeAPI.FakeAPI;
 import com.se.ssps_be.service.impl.SSOService;
 import com.se.ssps_be.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,21 @@ public class StudentApi {
 	private final StudentRepo studentRepo;
 	private final StudentMapper studentMapper;
 	private final SSOService ssoService;
+	private final FakeAPI fakeAPI;
+
+	@PostMapping("/buypages")
+	public ResponseEntity<?> buyPages(@RequestHeader(value = "Authorization") String authorizationHeader,
+								   @RequestBody BuyPagesRequest request){
+		String jwtToken = authorizationHeader.startsWith("Bearer ")
+				? authorizationHeader.substring(7)
+				: authorizationHeader;
+
+		// Lấy subject từ token
+		String username = JwtUtils.extractSubject(jwtToken);
+		String response = fakeAPI.buyPages(username, request);
+
+		return ResponseEntity.ok("successful");
+	}
 
 	@GetMapping("/all")
 	public ResponseEntity<?> getAllStudents() {
