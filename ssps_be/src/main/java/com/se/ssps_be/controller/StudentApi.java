@@ -37,7 +37,7 @@ public class StudentApi {
 		String username = JwtUtils.extractSubject(jwtToken);
 		String response = fakeAPI.buyPages(username, request);
 
-		return ResponseEntity.ok("successful");
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/all")
